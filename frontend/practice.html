@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Button and Text Field</title>
+    <style>
+        .container {
+            text-align: center;
+            margin-top: 50px;
+        }
+        .text-field {
+            font-size: 18px;
+            padding: 10px;
+            width: 300px;
+            text-align: center;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+        }
+        .btn {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: blue;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .btn:hover {
+            background-color: darkblue;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <input type="text" id="infoField" class="text-field" placeholder="Info will appear here" readonly>
+        <br>
+        <button class="btn" onclick="displayInfo()">Click Me</button>
+    </div>
+
+    <script>
+        function displayInfo() {
+            document.getElementById("infoField").value = "Hello Daivu! This is your info.";
+        }
+    </script>
+
+</body>
+</html>

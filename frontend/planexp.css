@@ -1,0 +1,349 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    background: linear-gradient(#051f30, #000000);
+    
+}
+
+.menu::-webkit-scrollbar {
+    display: none;
+}
+
+.menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 85px;
+    height: 100%;
+    transition: .3s;
+    scrollbar-width: none;
+    overflow: hidden scroll;
+    background: #ffffff12;
+    -ms-overflow-style: none;
+    padding: 20px 20px 20px 0;
+    backdrop-filter: blur(5px);
+    box-shadow: 8px 0px 9px 0px #00000014;
+}
+
+.menu:hover {
+    width: 260px;
+}
+
+.menu:hover li span:nth-child(2) {
+    display: block;
+}
+
+.menu-content li {
+    list-style: none;
+    border-radius: 0px 50px 50px 0;
+    transition: .3s;
+    margin-bottom: 20px;
+    padding-left: 20px;
+}
+
+.menu-content li:hover {
+    background: #0c0c0c;
+}
+
+.menu-content li span:nth-child(2) {
+    display: none;
+}
+
+a {
+    text-decoration: none;
+    color: rgb(213, 213, 213);
+    display: flex;
+    align-items: center;
+    font-family: 'calibri';
+}
+
+.material-symbols-outlined {
+    padding: 10px;
+    font-size: 25px;
+    margin-right: 10px;
+    border-radius: 50%;
+    background: #0c0c0c;
+}
+h1 {
+    color: #fff;
+    text-align: center;
+    margin-top: 50px;
+    font-family: 'TIMES NEW ROMAN';
+    font-size: 50px;
+}
+.uday {
+    color: #fff;
+    text-align: center; 
+    margin: 30px auto; 
+    padding: 20px; 
+    font-size: 100px;
+    font-family: 'TIMES NEW ROMAN';
+}
+/* Heading hover effect */
+.ud h1 {
+    text-align: center;
+    color: #eaeff5;
+    padding: 15px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    
+}
+
+.ud h1:hover {
+    color: #e74c3c;
+    transform: scale(1.05);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0);
+}
+
+/* Content box hover effect */
+.uday {
+    transition: all 0.3s ease;
+    background: rgba(0, 0, 0, 0);
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.uday:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    background: rgb(255, 255, 255);
+}
+
+.uday p {
+    transition: all 0.3s ease;
+}
+
+.uday:hover p {
+    color: #0e141a;
+}
+.expense-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+.expense-form {
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.expense-form h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.expense-form input,
+.expense-form textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.expense-form button {
+    width: 100%;
+    padding: 12px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.expense-form button:hover {
+    background-color: #45a049;
+}
+
+.expense-list {
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.expense-list h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.expense-card {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    margin-bottom: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    transition: transform 0.2s;
+}
+
+.expense-card:hover {
+    transform: translateX(5px);
+}
+
+.expense-card .material-symbols-outlined {
+    font-size: 24px;
+    margin-right: 15px;
+    color: #666;
+}
+
+.expense-card h3 {
+    margin: 0;
+    color: #333;
+    font-size: 16px;
+}
+
+.expense-card p {
+    margin: 5px 0 0;
+    color: #666;
+    font-size: 14px;
+}
+
+@media (max-width: 768px) {
+    .expense-container {
+        grid-template-columns: 1fr;
+        padding: 10px;
+    }
+}
+.expense-summary-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+
+.expense-cards {
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+}
+
+.expense-cards::-webkit-scrollbar {
+    width: 8px;
+}
+
+.expense-cards::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.expense-cards::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+.expense-list {
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.expense-list h2 {
+    color: #333;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.expense-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    margin-bottom: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    border-left: 4px solid #4CAF50;
+}
+
+.expense-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.expense-item-description {
+    flex: 1;
+}
+
+.expense-item-description h3 {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
+.expense-item-description p {
+    margin: 5px 0 0;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.expense-item-amount {
+    background: #e8f5e9;
+    padding: 10px 15px;
+    border-radius: 8px;
+    text-align: right;
+    min-width: 120px;
+}
+
+.expense-item-amount h3 {
+    margin: 0;
+    color: #4CAF50;
+    font-size: 1.2em;
+    font-weight: 600;
+}
+
+.expense-item-amount small {
+    color: #666;
+    font-size: 0.8em;
+    display: block;
+    margin-top: 4px;
+}
+
+.expense-total {
+    margin-top: 20px;
+    padding: 20px;
+    background: linear-gradient(145deg, #4CAF50, #45a049);
+    color: white;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.expense-total h3 {
+    margin: 0;
+    font-size: 1.1em;
+    opacity: 0.9;
+}
+
+.expense-total h2 {
+    margin: 10px 0 0;
+    font-size: 1.8em;
+    border: none;
+}
+
+@media (max-width: 768px) {
+    .expense-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .expense-item-amount {
+        margin-top: 10px;
+        width: 100%;
+        text-align: left;
+    }
+}
