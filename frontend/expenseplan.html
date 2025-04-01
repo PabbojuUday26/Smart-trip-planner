@@ -125,15 +125,6 @@
             color: var(--primary);
         }
 
-        .auth-buttons .btn {
-            margin-left: 1rem;
-            padding: 0.5rem 1.5rem;
-            border-radius: 50px;
-            font-weight: 500;
-            transition: var(--transition);
-            cursor: pointer;
-        }
-
         .btn-outline {
             border: 2px solid var(--primary);
             background: transparent;
@@ -476,6 +467,12 @@
             animation: loading 1.5s infinite;
         }
 
+        .ai-actions {
+            margin-top: 1.5rem;
+            display: flex;
+            justify-content: flex-end;
+        }
+
         @keyframes loading {
             0% { transform: translateX(-100%); }
             100% { transform: translateX(100%); }
@@ -748,10 +745,6 @@
                 font-size: 1.2rem;
             }
             
-            .auth-buttons {
-                display: none;
-            }
-            
             .header-content {
                 padding: 1rem;
             }
@@ -798,17 +791,13 @@
             </div>
             <nav id="nav">
                 <ul>
-                    <li><a href="#">Home</a></li>
+                    <li><a href="afterhome.html">Home</a></li>
                     <li><a href="#">Destinations</a></li>
                     <li><a href="#">Features</a></li>
-                    <li><a href="#">Expenses Planner</a></li>
+                    <li><a href="expenseplan.html">Expenses Planner</a></li>
                     <li><a href="#">Contact</a></li>
                 </ul>
             </nav>
-            <div class="auth-buttons">
-                <button class="btn btn-outline">Login</button>
-                <button class="btn btn-solid">Sign Up</button>
-            </div>
             <div class="hamburger" id="hamburger">
                 <span></span>
                 <span></span>
@@ -867,6 +856,11 @@
                 <div class="ai-response" id="ai-response" style="display: none;">
                     <h3><i class="fas fa-lightbulb"></i> AI Suggestions</h3>
                     <p id="ai-response-text"></p>
+                    <div class="ai-actions">
+                        <button class="plan-btn" id="add-ai-expenses">
+                            <i class="fas fa-plus"></i> Add Expenses
+                        </button>
+                    </div>
                 </div>
             </section>
 
@@ -997,6 +991,9 @@
             const generatePlanBtn = document.getElementById('generate-plan');
             const aiResponse = document.getElementById('ai-response');
             const aiResponseText = document.getElementById('ai-response-text');
+            const addAiExpensesBtn = document.getElementById('add-ai-expenses');
+            
+            let aiGeneratedExpenses = [];
             
             generatePlanBtn.addEventListener('click', function() {
                 const destination = document.getElementById('ai-destination').value;
@@ -1035,6 +1032,40 @@
                     
                     const totalBudget = dailyBudgets[budgetLevel] * duration * travelers;
                     
+                    // Generate sample expenses for the AI to suggest
+                    aiGeneratedExpenses = [
+                        {
+                            name: `${budgetLevels[budgetLevel]} Accommodation`,
+                            amount: (dailyBudgets[budgetLevel] * 0.4 * duration * travelers),
+                            category: 'accommodation',
+                            notes: `Estimated ${budgetLevel} accommodation for ${duration} days`
+                        },
+                        {
+                            name: 'Food & Dining',
+                            amount: (dailyBudgets[budgetLevel] * 0.3 * duration * travelers),
+                            category: 'food',
+                            notes: `Estimated food costs for ${duration} days`
+                        },
+                        {
+                            name: 'Transportation',
+                            amount: (dailyBudgets[budgetLevel] * 0.15 * duration * travelers),
+                            category: 'transportation',
+                            notes: 'Local transportation and transfers'
+                        },
+                        {
+                            name: 'Activities & Sightseeing',
+                            amount: (dailyBudgets[budgetLevel] * 0.1 * duration * travelers),
+                            category: 'activities',
+                            notes: 'Tours, entrance fees, and activities'
+                        },
+                        {
+                            name: 'Miscellaneous',
+                            amount: (dailyBudgets[budgetLevel] * 0.05 * duration * travelers),
+                            category: 'other',
+                            notes: 'Souvenirs, tips, and unexpected expenses'
+                        }
+                    ];
+                    
                     const response = `
                         <p>For your ${duration}-day trip to ${destination} with ${travelers} ${travelers == 1 ? 'person' : 'people'} on a ${budgetLevels[budgetLevel]} budget, here's a suggested breakdown:</p>
                         
@@ -1063,6 +1094,42 @@
                     // Scroll to the response
                     aiResponse.scrollIntoView({ behavior: 'smooth' });
                 }, 2000);
+            });
+            
+            // Add AI generated expenses to manual list
+            addAiExpensesBtn.addEventListener('click', function() {
+                if (aiGeneratedExpenses.length === 0) {
+                    alert('No expenses to add. Please generate a plan first.');
+                    return;
+                }
+                
+                // Get current expenses from localStorage
+                let expenses = JSON.parse(localStorage.getItem('travelExpenses')) || [];
+                
+                // Add AI generated expenses with current date
+                const today = new Date().toISOString().split('T')[0];
+                aiGeneratedExpenses.forEach(expense => {
+                    expenses.push({
+                        id: Date.now() + Math.floor(Math.random() * 1000), // unique ID
+                        name: expense.name,
+                        amount: expense.amount,
+                        date: today,
+                        category: expense.category,
+                        notes: expense.notes
+                    });
+                });
+                
+                // Save back to localStorage
+                localStorage.setItem('travelExpenses', JSON.stringify(expenses));
+                
+                // Update the display
+                updateExpensesDisplay();
+                
+                // Scroll to the manual planning section
+                document.querySelector('.manual-results').scrollIntoView({ behavior: 'smooth' });
+                
+                // Show success message
+                alert('AI-generated expenses have been added to your trip!');
             });
             
             // Manual Expense Tracking
