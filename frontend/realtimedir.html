@@ -1,0 +1,2221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Trip | Real-Time Directions</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        /* Base Styles with Enhanced Variables */
+        :root {
+            --primary: #6C63FF;
+            --primary-light: #8a84ff;
+            --secondary: #FF6584;
+            --accent: #43C6AC;
+            --accent-dark: #2fa58f;
+            --dark: #2D3748;
+            --dark-light: #4a5568;
+            --light: #F7FAFC;
+            --gradient: linear-gradient(135deg, #6C63FF 0%, #43C6AC 100%);
+            --gradient-hover: linear-gradient(135deg, #5a52e0 0%, #3ab79e 100%);
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+            --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.2);
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            --border-radius: 16px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Header Styles with Sticky Effect */
+        header {
+            background: white;
+            color: var(--dark);
+            padding: 1rem 0;
+            box-shadow: var(--shadow-sm);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            transition: var(--transition);
+        }
+
+        header.scrolled {
+            padding: 0.5rem 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            color: var(--primary);
+        }
+
+        .logo i {
+            margin-right: 0.5rem;
+            font-size: 2rem;
+            transition: var(--transition);
+        }
+
+        .logo:hover i {
+            transform: rotate(-15deg);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-left: 2rem;
+            position: relative;
+        }
+
+        nav ul li a {
+            color: var(--dark);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 0.5rem 0;
+            position: relative;
+        }
+
+        nav ul li a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary);
+            transition: width 0.4s ease;
+        }
+
+        nav ul li a:hover::after {
+            width: 100%;
+        }
+
+        nav ul li a:hover {
+            color: var(--primary);
+        }
+
+        .btn-outline {
+            border: 2px solid var(--primary);
+            background: transparent;
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+        }
+
+        .btn-solid {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+        }
+
+        .btn-solid:hover {
+            background: var(--gradient-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(108, 99, 255, 0.4);
+        }
+
+        /* Hamburger Menu for Mobile */
+        .hamburger {
+            display: none;
+            cursor: pointer;
+            width: 30px;
+            height: 20px;
+            position: relative;
+            z-index: 1001;
+        }
+
+        .hamburger span {
+            display: block;
+            position: absolute;
+            height: 3px;
+            width: 100%;
+            background: var(--primary);
+            border-radius: 3px;
+            opacity: 1;
+            left: 0;
+            transform: rotate(0deg);
+            transition: var(--transition);
+        }
+
+        .hamburger span:nth-child(1) {
+            top: 0;
+        }
+
+        .hamburger span:nth-child(2), .hamburger span:nth-child(3) {
+            top: 10px;
+        }
+
+        .hamburger span:nth-child(4) {
+            top: 20px;
+        }
+
+        .hamburger.open span:nth-child(1) {
+            top: 10px;
+            width: 0%;
+            left: 50%;
+        }
+
+        .hamburger.open span:nth-child(2) {
+            transform: rotate(45deg);
+        }
+
+        .hamburger.open span:nth-child(3) {
+            transform: rotate(-45deg);
+        }
+
+        .hamburger.open span:nth-child(4) {
+            top: 10px;
+            width: 0%;
+            left: 50%;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1400px;
+            margin: 6rem auto;
+            padding: 0 2rem;
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .page-header h1 {
+            font-size: 2.8rem;
+            color: var(--dark);
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            position: relative;
+        }
+
+        .page-header h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 80px;
+            height: 4px;
+            background: var(--gradient);
+            border-radius: 2px;
+        }
+
+        /* Directions Section */
+        .directions-section {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2.5rem;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            animation: fadeIn 0.8s ease-out forwards;
+            opacity: 0;
+        }
+
+        .directions-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--gradient);
+            transition: var(--transition);
+        }
+
+        .directions-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .directions-section:hover::before {
+            height: 8px;
+        }
+
+        .section-title {
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-title i {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+            transition: var(--transition);
+        }
+
+        .section-title:hover i {
+            transform: scale(1.1) rotate(10deg);
+        }
+
+        .section-title h2 {
+            font-size: 1.8rem;
+            color: var(--dark);
+            transition: var(--transition);
+        }
+
+        .section-title:hover h2 {
+            color: var(--primary);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+            transition: var(--transition);
+        }
+
+        .form-group:hover label {
+            color: var(--primary);
+        }
+
+        .form-group input, 
+        .form-group select, 
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus, 
+        .form-group select:focus, 
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.2);
+        }
+
+        .form-group:hover input,
+        .form-group:hover select,
+        .form-group:hover textarea {
+            border-color: var(--primary-light);
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        .plan-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.9rem 2rem;
+            background: var(--gradient);
+            color: white;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .plan-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
+            transform: translateX(-100%);
+            transition: var(--transition);
+        }
+
+        .plan-btn:hover {
+            transform: translateY(-3px);
+            background: var(--gradient-hover);
+            box-shadow: 0 10px 25px rgba(108, 99, 255, 0.4);
+        }
+
+        .plan-btn:hover::after {
+            transform: translateX(100%);
+        }
+
+        .plan-btn i {
+            transition: var(--transition);
+        }
+
+        .plan-btn:hover i {
+            transform: translateX(3px);
+        }
+
+        /* Map and Results Layout */
+        .results-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 992px) {
+            .results-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Map Box */
+        .map-box {
+            height: 500px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .map-box:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Related Places Box */
+        .related-places {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            height: 500px;
+            overflow-y: auto;
+            transition: var(--transition);
+        }
+
+        .related-places:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .related-places h3 {
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .place-item {
+            padding: 1rem 0;
+            border-bottom: 1px solid #edf2f7;
+            animation: fadeIn 0.5s ease-out;
+            transition: var(--transition);
+        }
+
+        .place-item:hover {
+            background: rgba(108, 99, 255, 0.03);
+            transform: translateX(5px);
+        }
+
+        .place-item:last-child {
+            border-bottom: none;
+        }
+
+        .place-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .place-title {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .place-distance {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+
+        .place-details {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+            color: var(--dark-light);
+        }
+
+        .place-category {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.2rem 0.5rem;
+            background: rgba(67, 198, 172, 0.1);
+            border-radius: 50px;
+            color: var(--accent-dark);
+            font-size: 0.8rem;
+            transition: var(--transition);
+        }
+
+        .place-item:hover .place-category {
+            background: rgba(67, 198, 172, 0.2);
+            transform: scale(1.05);
+        }
+
+        .place-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            color: #FFC107;
+        }
+
+        .no-places {
+            text-align: center;
+            padding: 2rem;
+            color: var(--dark-light);
+        }
+
+        /* Directions Info */
+        .directions-info {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(108, 99, 255, 0.05);
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--primary);
+        }
+
+        .directions-info h4 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .directions-info p {
+            color: var(--dark-light);
+            line-height: 1.7;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .page-header h1 {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hamburger {
+                display: block;
+            }
+            
+            nav {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 80%;
+                max-width: 350px;
+                height: 100vh;
+                background: white;
+                box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
+                transition: var(--transition);
+                z-index: 1000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            nav.active {
+                right: 0;
+            }
+            
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+                padding: 2rem;
+                width: 100%;
+            }
+            
+            nav ul li {
+                margin: 1rem 0;
+            }
+            
+            nav ul li a {
+                color: var(--dark);
+                font-size: 1.2rem;
+            }
+            
+            .header-content {
+                padding: 1rem;
+            }
+            
+            .main-content {
+                margin-top: 5rem;
+            }
+            
+            .page-header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .directions-section {
+                padding: 1.5rem;
+            }
+            
+            .section-title h2 {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .page-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .directions-section {
+                padding: 1.5rem 1rem;
+            }
+        }
+
+        /* Enhanced Map Controls */
+        .mapboxgl-ctrl-top-left {
+            top: 10px;
+            left: 10px;
+        }
+
+        .mapboxgl-ctrl-top-right {
+            top: 10px;
+            right: 10px;
+        }
+
+        .mapboxgl-ctrl-bottom-right {
+            bottom: 10px;
+            right: 10px;
+        }
+
+        .mapboxgl-ctrl-group {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .mapboxgl-ctrl-group button {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            background: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .mapboxgl-ctrl-group button:hover {
+            background-color: #f5f5f5;
+        }
+
+        .mapboxgl-ctrl-group button + button {
+            border-top: 1px solid #eee;
+        }
+
+        .mapboxgl-ctrl-icon {
+            font-size: 16px;
+            color: #333;
+        }
+
+        .mapboxgl-ctrl-geolocate {
+            color: #4285F4;
+        }
+
+        .mapboxgl-ctrl-geolocate:hover {
+            background-color: #e8f0fe;
+        }
+
+        /* Map Style Switcher */
+        .mapboxgl-ctrl-style-switcher {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .mapboxgl-ctrl-style-switcher button {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            background: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .mapboxgl-ctrl-style-switcher button:hover {
+            background-color: #f5f5f5;
+        }
+
+        .mapboxgl-ctrl-style-switcher button.active {
+            background-color: #e8f0fe;
+        }
+
+        /* Traffic Layer Control */
+        .mapboxgl-ctrl-traffic {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mapboxgl-ctrl-traffic label {
+            font-size: 14px;
+            color: #333;
+            cursor: pointer;
+        }
+
+        .mapboxgl-ctrl-traffic input {
+            margin: 0;
+            cursor: pointer;
+        }
+
+        /* Enhanced Marker Styles */
+        .mapboxgl-marker {
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .mapboxgl-marker:hover {
+            transform: scale(1.1);
+        }
+
+        /* Pulse animation for markers */
+        .pulse-marker {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--secondary);
+            position: relative;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.8); opacity: 0.7; }
+            70% { transform: scale(1.3); opacity: 0.3; }
+            100% { transform: scale(1.4); opacity: 0; }
+        }
+
+        /* Enhanced Popup Styles */
+        .mapboxgl-popup {
+            max-width: 300px !important;
+        }
+
+        .mapboxgl-popup-content {
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+        }
+
+        .mapboxgl-popup-close-button {
+            font-size: 1.2rem;
+            padding: 0 0.5rem;
+            color: var(--dark-light);
+            transition: var(--transition);
+        }
+
+        .mapboxgl-popup-close-button:hover {
+            color: var(--secondary);
+            background: none;
+        }
+
+        /* Place meta styles */
+        .place-meta {
+            display: flex;
+            justify-content: space-between;
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+        }
+
+        .place-status.open {
+            color: var(--accent-dark);
+        }
+
+        .place-status.closed {
+            color: var(--secondary);
+        }
+
+        .place-price {
+            color: var(--dark-light);
+        }
+
+        .plan-btn.small-btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Journey Controls */
+        .journey-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            display: flex;
+            gap: 1rem;
+            z-index: 10;
+            opacity: 0;
+            transition: var(--transition);
+        }
+        
+        .journey-controls.visible {
+            opacity: 1;
+        }
+        
+        .journey-progress {
+            width: 200px;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+        
+        .journey-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--gradient);
+            transition: width 0.3s linear;
+        }
+        
+        /* Building Labels */
+        .building-label {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #333;
+            text-shadow: 0 0 2px white;
+            pointer-events: none;
+        }
+        
+        /* Animation for moving car */
+        .car-marker {
+            width: 24px;
+            height: 24px;
+            background: var(--secondary);
+            border-radius: 50% 50% 0 50%;
+            transform: rotate(45deg);
+            position: relative;
+            animation: car-bounce 0.8s infinite alternate;
+        }
+        
+        .car-marker::before {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+        }
+        
+        @keyframes car-bounce {
+            from { transform: rotate(45deg) translateY(0); }
+            to { transform: rotate(45deg) translateY(-5px); }
+        }
+        
+        /* Pulsing effect for destination */
+        @keyframes pulse-destination {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(108, 99, 255, 0.7); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 15px rgba(108, 99, 255, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(108, 99, 255, 0); }
+        }
+        
+        .destination-marker {
+            animation: pulse-destination 2s infinite;
+        }
+
+        /* Marker styles */
+        .marker {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transform: translate(-50%, -50%);
+        }
+        
+        .source-marker {
+            background: #43C6AC;
+            color: white;
+            font-size: 16px;
+            box-shadow: 0 0 0 4px rgba(67, 198, 172, 0.3);
+            animation: pulse-source 2s infinite;
+        }
+        
+        .destination-marker {
+            background: #6C63FF;
+            color: white;
+            font-size: 16px;
+            box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.3);
+        }
+        
+        .pulse {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: inherit;
+            border-radius: inherit;
+            opacity: 0.8;
+            animation: pulse 2s infinite;
+            z-index: -1;
+        }
+        
+        @keyframes pulse-source {
+            0% { box-shadow: 0 0 0 0 rgba(67, 198, 172, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(67, 198, 172, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(67, 198, 172, 0); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            70% { transform: scale(2.5); opacity: 0; }
+            100% { transform: scale(2.5); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header id="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-plane"></i>
+                <span>Smart Trip</span>
+            </div>
+            <nav id="nav">
+                <ul>
+                    <li><a href="afterhome.html">Home</a></li>
+                    <li><a href="#">Destinations</a></li>
+                    <li><a href="#">Features</a></li>
+                    <li><a href="expenseplan.html">Expenses Planner</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </nav>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1>Real-Time Directions</h1>
+        </div>
+
+        <!-- Directions Section -->
+        <section class="directions-section">
+            <div class="section-title">
+                <i class="fas fa-route"></i>
+                <h2>Get Directions</h2>
+            </div>
+            <p>Enter your starting point and destination to get real-time directions and nearby places.</p>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="source">Source</label>
+                    <input type="text" id="source" placeholder="Enter starting location">
+                    <button id="current-location" class="plan-btn small-btn" style="margin-top: 0.5rem;">
+                        <i class="fas fa-location-arrow"></i> Use Current Location
+                    </button>
+                </div>
+                <div class="form-group">
+                    <label for="destination">Destination</label>
+                    <input type="text" id="destination" placeholder="Enter destination">
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button class="plan-btn" id="get-directions">
+                    <i class="fas fa-directions"></i> Get Directions
+                </button>
+            </div>
+            
+            <div class="results-container">
+                <div class="map-box">
+                    <div id="map"></div>
+                    <div class="journey-controls" id="journey-controls">
+                        <button class="plan-btn" id="start-journey">
+                            <i class="fas fa-play"></i> Start Journey
+                        </button>
+                        <button class="plan-btn btn-outline" id="cancel-journey">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                        <div class="journey-progress">
+                            <div class="journey-progress-bar" id="journey-progress"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="related-places">
+                    <h3><i class="fas fa-map-marker-alt"></i> Nearby Places</h3>
+                    <div id="places-container">
+                        <div class="no-places">
+                            <p>Search for directions to see nearby places at your destination</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="directions-info" id="directions-info" style="display: none;">
+                <h4><i class="fas fa-info-circle"></i> Directions Information</h4>
+                <p id="directions-text"></p>
+            </div>
+        </section>
+    </div>
+
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Mapbox with streets style
+            mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
+            const map = new mapboxgl.Map({
+                container: 'map',
+                style: 'mapbox://styles/mapbox/streets-v12', // Start with streets view
+                center: [77.5946, 12.9716], // Default to Bangalore
+                zoom: 12,
+                pitch: 45, // Add some 3D perspective
+                bearing: -17.6 // Slight rotation for better 3D effect
+            });
+
+            // Add navigation controls (zoom in/out)
+            map.addControl(new mapboxgl.NavigationControl(), 'top-left');
+            
+            // Add geolocate control
+            map.addControl(new mapboxgl.GeolocateControl({
+                positionOptions: {
+                    enableHighAccuracy: true
+                },
+                trackUserLocation: true,
+                showUserLocation: true,
+                showAccuracyCircle: false
+            }), 'top-right');
+
+            // Create custom style switcher control
+            class StyleSwitcherControl {
+                constructor() {
+                    this.styles = [
+                        { name: 'Streets', style: 'mapbox://styles/mapbox/streets-v12', icon: 'fas fa-road' },
+                        { name: 'Satellite', style: 'mapbox://styles/mapbox/satellite-v9', icon: 'fas fa-satellite' },
+                        { name: 'Light', style: 'mapbox://styles/mapbox/light-v11', icon: 'fas fa-sun' },
+                        { name: 'Dark', style: 'mapbox://styles/mapbox/dark-v11', icon: 'fas fa-moon' },
+                        { name: 'Outdoors', style: 'mapbox://styles/mapbox/outdoors-v12', icon: 'fas fa-tree' }
+                    ];
+                    this.currentStyleIndex = 0;
+                }
+
+                onAdd(map) {
+                    this.map = map;
+                    this.container = document.createElement('div');
+                    this.container.className = 'mapboxgl-ctrl mapboxgl-ctrl-style-switcher';
+                    
+                    // Create buttons for each style
+                    this.styles.forEach((style, index) => {
+                        const button = document.createElement('button');
+                        button.className = `mapboxgl-ctrl-icon ${index === 0 ? 'active' : ''}`;
+                        button.title = style.name;
+                        
+                        const icon = document.createElement('i');
+                        icon.className = style.icon;
+                        button.appendChild(icon);
+                        
+                        button.addEventListener('click', () => {
+                            this.setStyle(index);
+                        });
+                        
+                        this.container.appendChild(button);
+                    });
+                    
+                    return this.container;
+                }
+
+                onRemove() {
+                    this.container.parentNode.removeChild(this.container);
+                    this.map = undefined;
+                }
+
+                setStyle(index) {
+                    this.currentStyleIndex = index;
+                    this.map.setStyle(this.styles[index].style);
+                    
+                    // Update active button
+                    const buttons = this.container.querySelectorAll('button');
+                    buttons.forEach((btn, i) => {
+                        if (i === index) {
+                            btn.classList.add('active');
+                        } else {
+                            btn.classList.remove('active');
+                        }
+                    });
+
+                    // Add 3D buildings when switching to streets view
+                    if (index === 0) {
+                        add3DBuildings();
+                    }
+                }
+            }
+
+            // Add style switcher control
+            map.addControl(new StyleSwitcherControl(), 'top-right');
+
+            // Create traffic layer control
+            class TrafficControl {
+                constructor() {
+                    this.trafficLayerId = 'traffic-layer';
+                    this.trafficSourceId = 'traffic-source';
+                    this.trafficVisible = false;
+                }
+
+                onAdd(map) {
+                    this.map = map;
+                    this.container = document.createElement('div');
+                    this.container.className = 'mapboxgl-ctrl mapboxgl-ctrl-traffic';
+                    
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = 'traffic-toggle';
+                    checkbox.checked = this.trafficVisible;
+                    
+                    const label = document.createElement('label');
+                    label.htmlFor = 'traffic-toggle';
+                    label.textContent = 'Traffic';
+                    
+                    checkbox.addEventListener('change', () => {
+                        this.toggleTraffic();
+                    });
+                    
+                    this.container.appendChild(checkbox);
+                    this.container.appendChild(label);
+                    
+                    return this.container;
+                }
+
+                onRemove() {
+                    this.container.parentNode.removeChild(this.container);
+                    this.map = undefined;
+                }
+
+                toggleTraffic() {
+                    this.trafficVisible = !this.trafficVisible;
+                    
+                    if (this.trafficVisible) {
+                        this.addTrafficLayer();
+                    } else {
+                        this.removeTrafficLayer();
+                    }
+                }
+
+                addTrafficLayer() {
+                    if (this.map.getLayer(this.trafficLayerId)) return;
+                    
+                    this.map.addSource(this.trafficSourceId, {
+                        type: 'vector',
+                        url: 'mapbox://mapbox.mapbox-traffic-v1'
+                    });
+                    
+                    this.map.addLayer({
+                        id: this.trafficLayerId,
+                        type: 'line',
+                        source: this.trafficSourceId,
+                        'source-layer': 'traffic',
+                        paint: {
+                            'line-color': [
+                                'case',
+                                ['==', ['get', 'class'], 'motorway'], '#ff5252',
+                                ['==', ['get', 'class'], 'trunk'], '#ff9e80',
+                                ['==', ['get', 'class'], 'primary'], '#ffcc80',
+                                ['==', ['get', 'class'], 'secondary'], '#ffe082',
+                                '#fff59d'
+                            ],
+                            'line-width': [
+                                'interpolate',
+                                ['linear'],
+                                ['zoom'],
+                                4, 0.5,
+                                6, 1,
+                                10, 2,
+                                12, 3,
+                                14, 4,
+                                16, 5
+                            ],
+                            'line-opacity': 0.8
+                        }
+                    }, 'road-label'); // Add below road labels
+                }
+
+                removeTrafficLayer() {
+                    if (this.map.getLayer(this.trafficLayerId)) {
+                        this.map.removeLayer(this.trafficLayerId);
+                    }
+                    if (this.map.getSource(this.trafficSourceId)) {
+                        this.map.removeSource(this.trafficSourceId);
+                    }
+                }
+            }
+
+            // Add traffic control
+            map.addControl(new TrafficControl(), 'bottom-right');
+
+            // Add scale control
+            map.addControl(new mapboxgl.ScaleControl({
+                maxWidth: 100,
+                unit: 'metric'
+            }), 'bottom-right');
+
+            // Add fullscreen control
+            map.addControl(new mapboxgl.FullscreenControl(), 'top-right');
+
+            // Enhanced 3D buildings and roads initialization
+            function initializeMapFeatures() {
+                // Add 3D buildings
+                add3DBuildings();
+                
+                // Enhanced roads with different classifications
+                enhanceRoads();
+                
+                // Add terrain if available
+                addTerrain();
+                
+                // Add labels layer
+                addLabels();
+            }
+
+            // Function to add 3D buildings with more detail
+            function add3DBuildings() {
+                // Remove existing layer if it exists
+                if (map.getLayer('3d-buildings')) {
+                    map.removeLayer('3d-buildings');
+                }
+                
+                // Add 3D buildings layer with more detailed styling
+                map.addLayer({
+                    'id': '3d-buildings',
+                    'source': 'composite',
+                    'source-layer': 'building',
+                    'filter': ['==', 'extrude', 'true'],
+                    'type': 'fill-extrusion',
+                    'minzoom': 12,
+                    'paint': {
+                        'fill-extrusion-color': [
+                            'interpolate',
+                            ['linear'],
+                            ['get', 'height'],
+                            0, 'hsl(0, 0%, 90%)',
+                            10, 'hsl(0, 0%, 85%)',
+                            20, 'hsl(0, 0%, 80%)',
+                            50, 'hsl(0, 0%, 75%)',
+                            100, 'hsl(0, 0%, 70%)',
+                            200, 'hsl(0, 0%, 65%)'
+                        ],
+                        'fill-extrusion-height': [
+                            'interpolate',
+                            ['linear'],
+                            ['zoom'],
+                            12,
+                            0,
+                            12.05,
+                            ['get', 'height']
+                        ],
+                        'fill-extrusion-base': [
+                            'interpolate',
+                            ['linear'],
+                            ['zoom'],
+                            12,
+                            0,
+                            12.05,
+                            ['get', 'min_height']
+                        ],
+                        'fill-extrusion-opacity': 0.9,
+                        'fill-extrusion-ambient-occlusion-intensity': 0.3,
+                        'fill-extrusion-ambient-occlusion-radius': 2
+                    }
+                }, 'road-label');
+            }
+
+            // Function to enhance roads with better styling and classification
+            function enhanceRoads() {
+                // Remove existing layers if they exist
+                ['road-street', 'road-major', 'road-highway', 'road-pedestrian'].forEach(layer => {
+                    if (map.getLayer(layer)) {
+                        map.removeLayer(layer);
+                    }
+                });
+                
+                // Add a thicker, more prominent road layer for streets
+                map.addLayer({
+                    id: 'road-street',
+                    type: 'line',
+                    source: 'composite',
+                    'source-layer': 'road',
+                    filter: ['==', ['get', 'class'], 'street'],
+                    paint: {
+                        'line-color': '#ffffff',
+                        'line-width': [
+                            'interpolate',
+                            ['linear'],
+                            ['zoom'],
+                            12, 1,
+                            14, 2,
+                            16, 3
+                        ],
+                        'line-opacity': 0.9
+                    }
+                }, 'road-label');
+
+                // Add a layer for major roads
+                map.addLayer({
+                    id: 'road-major',
+                    type: 'line',
+                    source: 'composite',
+                    'source-layer': 'road',
+                    filter: ['==', ['get', 'class'], 'major_road'],
+                    paint: {
+                        'line-color': '#ffffff',
+                        'line-width': [
+                            'interpolate',
+                            ['linear'],
+                            ['zoom'],
+                            10, 2,
+                            12, 3,
+                            14, 4,
+                            16, 5
+                        ],
+                        'line-opacity': 0.9
+                    }
+                }, 'road-label');
+
+                // Add a layer for highways
+                map.addLayer({
+                    id: 'road-highway',
+                    type: 'line',
+                    source: 'composite',
+                    'source-layer': 'road',
+                    filter: ['==', ['get', 'class'], 'highway'],
+                    paint: {
+                        'line-color': '#ffffff',
+                        'line-width': [
+                            'interpolate',
+                            ['linear'],
+                            ['zoom'],
+                            8, 3,
+                            10, 4,
+                            12, 5,
+                            14, 6,
+                            16, 7
+                        ],
+                        'line-opacity': 0.9
+                    }
+                }, 'road-label');
+
+                // Add a layer for pedestrian paths
+                map.addLayer({
+                    id: 'road-pedestrian',
+                    type: 'line',
+                    source: 'composite',
+                    'source-layer': 'road',
+                    filter: ['==', ['get', 'class'], 'pedestrian'],
+                    paint: {
+                        'line-color': '#f0f0f0',
+                        'line-width': [
+                            'interpolate',
+                            ['linear'],
+                            ['zoom'],
+                            14, 1,
+                            16, 2
+                        ],
+                        'line-dasharray': [2, 1],
+                        'line-opacity': 0.7
+                    }
+                }, 'road-label');
+            }
+
+            // Function to add terrain (if available in the style)
+            function addTerrain() {
+                if (map.getSource('mapbox-dem')) {
+                    map.addLayer({
+                        'id': 'terrain',
+                        'source': 'mapbox-dem',
+                        'type': 'hillshade',
+                        'paint': {
+                            'hillshade-exaggeration': 0.5
+                        }
+                    });
+                }
+            }
+
+            // Function to add building labels
+            function addBuildingLabels() {
+                map.addLayer({
+                    id: 'building-labels',
+                    type: 'symbol',
+                    source: 'composite',
+                    'source-layer': 'building',
+                    minzoom: 15,
+                    filter: ['>', ['get', 'height'], 10],
+                    layout: {
+                        'text-field': ['get', 'name'],
+                        'text-size': 10,
+                        'text-transform': 'uppercase',
+                        'text-font': ['Open Sans Semibold'],
+                        'text-max-width': 5,
+                        'text-allow-overlap': false
+                    },
+                    paint: {
+                        'text-color': '#333',
+                        'text-halo-color': 'rgba(255,255,255,0.8)',
+                        'text-halo-width': 1
+                    }
+                }, 'road-label');
+            }
+            
+            // Function to add places labels
+            function addPlacesLabels() {
+                map.addLayer({
+                    id: 'poi-labels',
+                    type: 'symbol',
+                    source: 'composite',
+                    'source-layer': 'poi',
+                    minzoom: 14,
+                    filter: [
+                        'any',
+                        ['==', ['get', 'type'], 'hospital'],
+                        ['==', ['get', 'type'], 'school'],
+                        ['==', ['get', 'type'], 'university'],
+                        ['==', ['get', 'type'], 'park'],
+                        ['==', ['get', 'type'], 'museum'],
+                        ['==', ['get', 'type'], 'landmark']
+                    ],
+                    layout: {
+                        'text-field': ['get', 'name_en'],
+                        'text-size': 12,
+                        'text-font': ['Open Sans Semibold'],
+                        'text-max-width': 5,
+                        'text-allow-overlap': false,
+                        'text-offset': [0, 0.5]
+                    },
+                    paint: {
+                        'text-color': '#333',
+                        'text-halo-color': 'rgba(255,255,255,0.8)',
+                        'text-halo-width': 1
+                    }
+                }, 'road-label');
+            }
+
+            // Function to enhance labels
+            function addLabels() {
+                // This would be handled by the map style, but we can adjust if needed
+            }
+
+            // Initialize map features when the map loads
+            map.on('load', initializeMapFeatures);
+
+            // Mobile Menu Toggle
+            const hamburger = document.getElementById('hamburger');
+            const nav = document.getElementById('nav');
+            
+            hamburger.addEventListener('click', function() {
+                this.classList.toggle('open');
+                nav.classList.toggle('active');
+            });
+            
+            // Close mobile menu when clicking on a link
+            document.querySelectorAll('nav ul li a').forEach(link => {
+                link.addEventListener('click', () => {
+                    hamburger.classList.remove('open');
+                    nav.classList.remove('active');
+                });
+            });
+            
+            // Sticky Header
+            const header = document.getElementById('header');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+
+            // Enhanced Directions Functionality
+            const getDirectionsBtn = document.getElementById('get-directions');
+            const directionsInfo = document.getElementById('directions-info');
+            const directionsText = document.getElementById('directions-text');
+            const placesContainer = document.getElementById('places-container');
+            
+            // Variables for map functionality
+            let sourceMarker = null;
+            let destinationMarker = null;
+            let routeLayer = null;
+            let markers = [];
+            let carMarker = null;
+            let animationFrameId = null;
+            let isJourneyActive = false;
+            
+            // Enhanced get directions function
+            getDirectionsBtn.addEventListener('click', async function() {
+                const source = document.getElementById('source').value;
+                const destination = document.getElementById('destination').value;
+                
+                if (!source || !destination) {
+                    alert('Please enter both source and destination');
+                    return;
+                }
+                
+                // Show loading state
+                directionsInfo.style.display = 'block';
+                directionsText.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Calculating best route...</p>';
+                
+                try {
+                    // In a real app, you would use geocoding to get coordinates
+                    // For this demo, we'll use sample coordinates
+                    const sourceCoords = await geocodeLocation(source) || [77.5846, 12.9616];
+                    const destCoords = await geocodeLocation(destination) || [77.6046, 12.9816];
+                    
+                    // Clear previous markers and route
+                    clearMap();
+                    
+                    // Add new markers with custom HTML
+                    sourceMarker = createCustomMarker(sourceCoords, 'source', source, 'Starting point');
+                    destinationMarker = createCustomMarker(destCoords, 'destination', destination, 'Destination');
+                    
+                    // Fit map to bounds with padding and bearing
+                    const bounds = new mapboxgl.LngLatBounds();
+                    bounds.extend(sourceCoords);
+                    bounds.extend(destCoords);
+                    map.fitBounds(bounds, { 
+                        padding: 100,
+                        bearing: 0,
+                        pitch: 45 // Maintain 3D perspective
+                    });
+                    
+                    // Simulate getting directions (in real app, use Mapbox Directions API)
+                    simulateDirections(source, destination, sourceCoords, destCoords);
+                    
+                    // Show nearby places (now with more than 8 places)
+                    showNearbyPlaces(destination, destCoords);
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    directionsText.innerHTML = '<p style="color: var(--secondary)">Error getting directions. Please try again.</p>';
+                }
+            });
+            
+            // Function to create custom HTML markers
+            function createCustomMarker(coords, type, title, description) {
+                // Create marker element
+                const el = document.createElement('div');
+                el.className = `marker ${type}-marker`;
+                
+                // Create icon based on type
+                const icon = document.createElement('i');
+                icon.className = type === 'source' ? 'fas fa-map-pin' : 'fas fa-flag';
+                el.appendChild(icon);
+                
+                // Create pulse effect for destination
+                if (type === 'destination') {
+                    const pulse = document.createElement('div');
+                    pulse.className = 'pulse';
+                    el.appendChild(pulse);
+                }
+                
+                // Create and return marker
+                const marker = new mapboxgl.Marker({
+                    element: el,
+                    anchor: 'bottom'
+                })
+                .setLngLat(coords)
+                .setPopup(new mapboxgl.Popup({ offset: 25 })
+                    .setHTML(`<h3>${title}</h3><p>${description}</p>`))
+                .addTo(map);
+                
+                return marker;
+            }
+            
+            // Function to clear all map elements
+            function clearMap() {
+                if (sourceMarker) sourceMarker.remove();
+                if (destinationMarker) destinationMarker.remove();
+                if (routeLayer && map.getLayer('route')) {
+                    map.removeLayer('route');
+                    map.removeSource('route');
+                }
+                
+                // Clear all place markers
+                markers.forEach(marker => marker.remove());
+                markers = [];
+                
+                // Cancel any active journey
+                cancelJourney();
+            }
+            
+            // Simulated geocoding function
+            async function geocodeLocation(location) {
+                // In a real app, you would use Mapbox Geocoding API here
+                // For demo purposes, we'll return some sample coordinates
+                const sampleLocations = {
+                    'bangalore': [77.5946, 12.9716],
+                    'mumbai': [72.8777, 19.0760],
+                    'delhi': [77.2090, 28.6139],
+                    'chennai': [80.2707, 13.0827],
+                    'hyderabad': [78.4867, 17.3850],
+                    'kolkata': [88.3639, 22.5726],
+                    'pune': [73.8567, 18.5204],
+                    'jaipur': [75.7873, 26.9124]
+                };
+                
+                const normalizedLocation = location.toLowerCase();
+                for (const [key, coords] of Object.entries(sampleLocations)) {
+                    if (normalizedLocation.includes(key)) {
+                        return coords;
+                    }
+                }
+                return null;
+            }
+            
+            // Enhanced simulateDirections function
+            function simulateDirections(source, destination, sourceCoords, destCoords) {
+                // In a real app, you would use Mapbox Directions API here
+                const distance = calculateDistance(sourceCoords, destCoords);
+                const duration = Math.round(distance * 2); // minutes
+                
+                directionsText.innerHTML = `
+                    <h4><i class="fas fa-route"></i> Route from ${source} to ${destination}</h4>
+                    <div class="route-summary">
+                        <p><i class="fas fa-road"></i> <strong>Distance:</strong> ${distance.toFixed(1)} km</p>
+                        <p><i class="fas fa-clock"></i> <strong>Duration:</strong> ${duration} min</p>
+                        <p><i class="fas fa-car"></i> <strong>Route:</strong></p>
+                        <ol>
+                            <li>Start at ${source}</li>
+                            <li>Head northeast on Main Road (0.5 km)</li>
+                            <li>Turn right onto Central Avenue (2 km)</li>
+                            <li>Continue straight onto Highway (${(distance-3).toFixed(1)} km)</li>
+                            <li>Take exit toward ${destination}</li>
+                            <li>Arrive at ${destination}</li>
+                        </ol>
+                    </div>
+                `;
+                
+                // Simulate drawing a route on the map
+                // Generate more points for a smoother route
+                const routeCoordinates = generateRoutePoints(sourceCoords, destCoords);
+                
+                // Add route source
+                map.addSource('route', {
+                    type: 'geojson',
+                    data: {
+                        type: 'Feature',
+                        properties: {},
+                        geometry: {
+                            type: 'LineString',
+                            coordinates: routeCoordinates
+                        }
+                    }
+                });
+                
+                // Add route layer
+                map.addLayer({
+                    id: 'route',
+                    type: 'line',
+                    source: 'route',
+                    layout: {
+                        'line-join': 'round',
+                        'line-cap': 'round'
+                    },
+                    paint: {
+                        'line-color': '#6C63FF',
+                        'line-width': 4,
+                        'line-opacity': 0.8
+                    }
+                });
+                
+                // Show journey controls
+                document.getElementById('journey-controls').classList.add('visible');
+                
+                // Set up journey animation
+                setupJourneyAnimation(routeCoordinates, duration);
+            }
+            
+            // Function to generate more route points for smoother animation
+            function generateRoutePoints(start, end) {
+                const points = [];
+                const steps = 20;
+                
+                // Add starting point
+                points.push(start);
+                
+                // Generate intermediate points with some curvature
+                for (let i = 1; i < steps; i++) {
+                    const fraction = i / steps;
+                    const midLon = start[0] + (end[0] - start[0]) * fraction;
+                    const midLat = start[1] + (end[1] - start[1]) * fraction;
+                    
+                    // Add some curvature to the route
+                    const curveFactor = 0.0005 * Math.sin(fraction * Math.PI);
+                    const curvedLon = midLon + curveFactor;
+                    const curvedLat = midLat - curveFactor;
+                    
+                    points.push([curvedLon, curvedLat]);
+                }
+                
+                // Add end point
+                points.push(end);
+                
+                return points;
+            }
+            
+            // Function to set up journey animation
+            function setupJourneyAnimation(routeCoordinates, duration) {
+                // Create car marker
+                const carElement = document.createElement('div');
+                carElement.className = 'car-marker';
+                carMarker = new mapboxgl.Marker({
+                    element: carElement,
+                    offset: [-12, -12]
+                })
+                .setLngLat(routeCoordinates[0])
+                .addTo(map);
+                
+                // Set up event listeners for buttons
+                document.getElementById('start-journey').addEventListener('click', function() {
+                    if (!isJourneyActive) {
+                        startJourney(routeCoordinates, duration);
+                    }
+                });
+                
+                document.getElementById('cancel-journey').addEventListener('click', function() {
+                    cancelJourney();
+                });
+            }
+            
+            // Function to start the journey animation
+            function startJourney(routeCoordinates, duration) {
+                isJourneyActive = true;
+                const startTime = Date.now();
+                const totalDuration = duration * 60 * 1000; // Convert to milliseconds
+                
+                // Update progress bar
+                const progressBar = document.getElementById('journey-progress');
+                
+                // Animation function
+                function animateJourney() {
+                    if (!isJourneyActive) return;
+                    
+                    const elapsed = Date.now() - startTime;
+                    const progress = Math.min(elapsed / totalDuration, 1);
+                    
+                    // Update progress bar
+                    progressBar.style.width = `${progress * 100}%`;
+                    
+                    // Calculate current position along route
+                    const exactIndex = progress * (routeCoordinates.length - 1);
+                    const index = Math.floor(exactIndex);
+                    const fraction = exactIndex - index;
+                    
+                    if (index < routeCoordinates.length - 1) {
+                        // Interpolate between points
+                        const startPoint = routeCoordinates[index];
+                        const endPoint = routeCoordinates[index + 1];
+                        const currentLon = startPoint[0] + (endPoint[0] - startPoint[0]) * fraction;
+                        const currentLat = startPoint[1] + (endPoint[1] - startPoint[1]) * fraction;
+                        
+                        // Update car position
+                        carMarker.setLngLat([currentLon, currentLat]);
+                        
+                        // Calculate bearing for car rotation
+                        const bearing = calculateBearing(startPoint, endPoint);
+                        carMarker.getElement().style.transform = `rotate(${bearing + 45}deg)`;
+                        
+                        // Continue animation
+                        animationFrameId = requestAnimationFrame(animateJourney);
+                    } else {
+                        // Journey complete
+                        carMarker.setLngLat(routeCoordinates[routeCoordinates.length - 1]);
+                        isJourneyActive = false;
+                        
+                        // Show completion message
+                        directionsText.innerHTML += `
+                            <div class="directions-info" style="margin-top: 1rem; background: rgba(67, 198, 172, 0.1); border-left-color: var(--accent);">
+                                <h4><i class="fas fa-check-circle"></i> Journey Complete!</h4>
+                                <p>You have arrived at your destination: ${document.getElementById('destination').value}</p>
+                            </div>
+                        `;
+                        
+                        // Hide journey controls after delay
+                        setTimeout(() => {
+                            document.getElementById('journey-controls').classList.remove('visible');
+                        }, 3000);
+                    }
+                }
+                
+                // Start animation
+                animateJourney();
+            }
+            
+            // Function to cancel the journey
+            function cancelJourney() {
+                isJourneyActive = false;
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId);
+                }
+                
+                // Reset progress bar
+                document.getElementById('journey-progress').style.width = '0%';
+                
+                // Remove car marker
+                if (carMarker) {
+                    carMarker.remove();
+                    carMarker = null;
+                }
+                
+                // Hide controls
+                document.getElementById('journey-controls').classList.remove('visible');
+            }
+            
+            // Function to calculate bearing between two points
+            function calculateBearing(start, end) {
+                const startLon = start[0] * Math.PI / 180;
+                const startLat = start[1] * Math.PI / 180;
+                const endLon = end[0] * Math.PI / 180;
+                const endLat = end[1] * Math.PI / 180;
+                
+                const y = Math.sin(endLon - startLon) * Math.cos(endLat);
+                const x = Math.cos(startLat) * Math.sin(endLat) -
+                          Math.sin(startLat) * Math.cos(endLat) * Math.cos(endLon - startLon);
+                const bearing = Math.atan2(y, x) * 180 / Math.PI;
+                
+                return (bearing + 360) % 360;
+            }
+            
+            // Calculate distance between coordinates (simplified)
+            function calculateDistance(coord1, coord2) {
+                const R = 6371; // Earth radius in km
+                const dLat = (coord2[1] - coord1[1]) * Math.PI / 180;
+                const dLon = (coord2[0] - coord1[0]) * Math.PI / 180;
+                const a = 
+                    Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(coord1[1] * Math.PI / 180) * 
+                    Math.cos(coord2[1] * Math.PI / 180) *
+                    Math.sin(dLon/2) * Math.sin(dLon/2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                return R * c;
+            }
+            
+            // Enhanced nearby places function with more than 8 places
+            function showNearbyPlaces(destination, destCoords) {
+                // Sample nearby places data with more details and more than 8 places
+                const places = [
+                    {
+                        name: `${destination} Central Cafe`,
+                        category: 'cafe',
+                        distance: '0.2 km',
+                        rating: 4.5,
+                        description: 'Popular cafe with specialty coffee and breakfast',
+                        open: 'Open now',
+                        price: '₹₹',
+                        coordinates: [destCoords[0] + 0.001, destCoords[1] + 0.001]
+                    },
+                    {
+                        name: `${destination} City Park`,
+                        category: 'park',
+                        distance: '0.5 km',
+                        rating: 4.2,
+                        description: 'Beautiful urban park with walking trails and ponds',
+                        open: 'Open 24/7',
+                        price: 'Free',
+                        coordinates: [destCoords[0] - 0.002, destCoords[1] + 0.0015]
+                    },
+                    {
+                        name: `${destination} Mall`,
+                        category: 'shopping',
+                        distance: '1.1 km',
+                        rating: 4.0,
+                        description: 'Large shopping center with 200+ stores and food court',
+                        open: 'Open until 10pm',
+                        price: '₹₹₹',
+                        coordinates: [destCoords[0] + 0.003, destCoords[1] - 0.001]
+                    },
+                    {
+                        name: `${destination} Heritage Museum`,
+                        category: 'museum',
+                        distance: '1.8 km',
+                        rating: 4.7,
+                        description: 'Local history museum with interactive exhibits',
+                        open: 'Open until 6pm',
+                        price: '₹200 entry',
+                        coordinates: [destCoords[0] - 0.0015, destCoords[1] - 0.0025]
+                    },
+                    {
+                        name: `${destination} Grand Hotel`,
+                        category: 'hotel',
+                        distance: '0.3 km',
+                        rating: 4.3,
+                        description: 'Luxury accommodations with spa and rooftop pool',
+                        open: '24/7',
+                        price: '₹₹₹₹',
+                        coordinates: [destCoords[0] + 0.002, destCoords[1] - 0.0005]
+                    },
+                    {
+                        name: `${destination} Medical Center`,
+                        category: 'hospital',
+                        distance: '0.7 km',
+                        rating: 4.1,
+                        description: '24-hour emergency care and general practice',
+                        open: '24/7',
+                        price: '₹₹₹',
+                        coordinates: [destCoords[0] - 0.001, destCoords[1] + 0.002]
+                    },
+                    {
+                        name: `${destination} Train Station`,
+                        category: 'transport',
+                        distance: '1.5 km',
+                        rating: 3.9,
+                        description: 'Main railway station with connections to all major cities',
+                        open: '4am - 11pm',
+                        price: 'Varies',
+                        coordinates: [destCoords[0] + 0.0025, destCoords[1] + 0.002]
+                    },
+                    {
+                        name: `${destination} Botanical Garden`,
+                        category: 'park',
+                        distance: '2.2 km',
+                        rating: 4.6,
+                        description: 'Expansive gardens with rare plant species and greenhouses',
+                        open: '8am - 7pm',
+                        price: '₹50 entry',
+                        coordinates: [destCoords[0] - 0.003, destCoords[1] - 0.001]
+                    },
+                    {
+                        name: `${destination} Tech Park`,
+                        category: 'business',
+                        distance: '1.3 km',
+                        rating: 4.0,
+                        description: 'Business district with tech companies and coworking spaces',
+                        open: 'Business hours',
+                        price: 'Varies',
+                        coordinates: [destCoords[0] + 0.0015, destCoords[1] - 0.002]
+                    },
+                    {
+                        name: `${destination} Food Court`,
+                        category: 'restaurant',
+                        distance: '0.4 km',
+                        rating: 3.8,
+                        description: 'Variety of cuisines in a modern food hall setting',
+                        open: '10am - 10pm',
+                        price: '₹₹',
+                        coordinates: [destCoords[0] + 0.0005, destCoords[1] - 0.0015]
+                    },
+                    {
+                        name: `${destination} Cinema Complex`,
+                        category: 'entertainment',
+                        distance: '0.8 km',
+                        rating: 4.2,
+                        description: '12-screen multiplex with IMAX and premium seating',
+                        open: '10am - 1am',
+                        price: '₹₹₹',
+                        coordinates: [destCoords[0] - 0.0012, destCoords[1] - 0.0018]
+                    },
+                    {
+                        name: `${destination} Sports Arena`,
+                        category: 'sports',
+                        distance: '2.5 km',
+                        rating: 4.4,
+                        description: 'Multi-purpose stadium hosting sports and concerts',
+                        open: 'Varies by event',
+                        price: 'Varies',
+                        coordinates: [destCoords[0] + 0.004, destCoords[1] - 0.003]
+                    }
+                ];
+                
+                // Clear previous places
+                placesContainer.innerHTML = '';
+                
+                // Add markers for places with different colors based on category
+                places.forEach(place => {
+                    const markerColor = getMarkerColor(place.category);
+                    const marker = new mapboxgl.Marker({
+                        color: markerColor,
+                        rotation: 45 // Make markers stand out
+                    })
+                    .setLngLat(place.coordinates)
+                    .setPopup(new mapboxgl.Popup({ offset: 25 })
+                        .setHTML(`
+                            <h3>${place.name}</h3>
+                            <p><i class="${getPlaceIcon(place.category)}"></i> ${formatCategory(place.category)}</p>
+                            <p>${place.description}</p>
+                            <p><i class="fas fa-road"></i> ${place.distance} from destination</p>
+                            <p><i class="fas fa-star"></i> ${place.rating}/5.0</p>
+                        `))
+                    .addTo(map);
+                    
+                    markers.push(marker);
+                });
+                
+                // Add each place to the container
+                places.forEach(place => {
+                    const placeElement = document.createElement('div');
+                    placeElement.className = 'place-item';
+                    
+                    placeElement.innerHTML = `
+                        <div class="place-header">
+                            <span class="place-title">${place.name}</span>
+                            <span class="place-distance">${place.distance}</span>
+                        </div>
+                        <div class="place-details">
+                            <span class="place-category">
+                                <i class="${getPlaceIcon(place.category)}"></i> ${formatCategory(place.category)}
+                            </span>
+                            <span class="place-rating">
+                                <i class="fas fa-star"></i> ${place.rating}
+                            </span>
+                        </div>
+                        <div class="place-meta">
+                            <span class="place-status ${place.open.includes('Open') ? 'open' : 'closed'}">
+                                <i class="fas fa-clock"></i> ${place.open}
+                            </span>
+                            <span class="place-price">
+                                ${place.price}
+                            </span>
+                        </div>
+                        <p class="place-description">${place.description}</p>
+                        <button class="plan-btn small-btn" onclick="focusOnPlace([${place.coordinates}])">
+                            <i class="fas fa-map-marker-alt"></i> View on Map
+                        </button>
+                    `;
+                    
+                    placesContainer.appendChild(placeElement);
+                });
+            }
+            
+            // Function to get marker color based on category
+            function getMarkerColor(category) {
+                const colors = {
+                    'cafe': '#43C6AC',
+                    'park': '#4CAF50',
+                    'shopping': '#9C27B0',
+                    'museum': '#FF9800',
+                    'hotel': '#2196F3',
+                    'hospital': '#F44336',
+                    'transport': '#607D8B',
+                    'business': '#3F51B5',
+                    'restaurant': '#E91E63',
+                    'entertainment': '#FF5722',
+                    'sports': '#795548',
+                    'default': '#6C63FF'
+                };
+                return colors[category.toLowerCase()] || colors.default;
+            }
+            
+            // Function to focus map on a place
+            window.focusOnPlace = function(coordinates) {
+                map.flyTo({
+                    center: coordinates,
+                    zoom: 16,
+                    bearing: 0,
+                    pitch: 60, // More dramatic 3D view
+                    essential: true
+                });
+                
+                // Pulse animation for the marker
+                const markerElement = document.createElement('div');
+                markerElement.className = 'pulse-marker';
+                
+                new mapboxgl.Marker({
+                    element: markerElement
+                })
+                .setLngLat(coordinates)
+                .addTo(map);
+                
+                setTimeout(() => {
+                    markerElement.remove();
+                }, 3000);
+            };
+            
+            // Enhanced place icon function
+            function getPlaceIcon(category) {
+                const icons = {
+                    'cafe': 'fas fa-coffee',
+                    'restaurant': 'fas fa-utensils',
+                    'park': 'fas fa-tree',
+                    'shopping': 'fas fa-shopping-bag',
+                    'museum': 'fas fa-landmark',
+                    'hotel': 'fas fa-hotel',
+                    'hospital': 'fas fa-hospital',
+                    'transport': 'fas fa-train',
+                    'business': 'fas fa-briefcase',
+                    'entertainment': 'fas fa-film',
+                    'sports': 'fas fa-running',
+                    'attraction': 'fas fa-camera',
+                    'bar': 'fas fa-glass-martini-alt',
+                    'default': 'fas fa-map-marker-alt'
+                };
+                return icons[category.toLowerCase()] || icons.default;
+            }
+            
+            // Enhanced category formatting
+            function formatCategory(category) {
+                const categories = {
+                    'cafe': 'Cafe',
+                    'park': 'Park',
+                    'shopping': 'Shopping',
+                    'museum': 'Museum',
+                    'hotel': 'Hotel',
+                    'hospital': 'Hospital',
+                    'transport': 'Transport',
+                    'business': 'Business',
+                    'restaurant': 'Restaurant',
+                    'entertainment': 'Entertainment',
+                    'sports': 'Sports'
+                };
+                return categories[category.toLowerCase()] || category;
+            }
+            
+            // Add current location button functionality
+            document.getElementById('current-location').addEventListener('click', function() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        position => {
+                            const coords = [position.coords.longitude, position.coords.latitude];
+                            document.getElementById('source').value = 'My Location';
+                            
+                            // Fly to location with 3D perspective
+                            map.flyTo({
+                                center: coords,
+                                zoom: 15,
+                                bearing: 0,
+                                pitch: 45,
+                                essential: true
+                            });
+                            
+                            // Add marker at current location
+                            if (sourceMarker) sourceMarker.remove();
+                            sourceMarker = createCustomMarker(coords, 'source', 'My Location', 'Current location');
+                        },
+                        error => {
+                            alert('Unable to get your location. Please enable location services.');
+                        }
+                    );
+                } else {
+                    alert('Geolocation is not supported by your browser.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
