@@ -1,0 +1,1746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Smart Trip </title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6C63FF;
+            --primary-light: #8a84ff;
+            --secondary: #FF6584;
+            --accent: #43C6AC;
+            --accent-dark: #2fa58f;
+            --dark: #2D3748;
+            --dark-light: #4a5568;
+            --light: #F7FAFC;
+            --gradient: linear-gradient(135deg, #6C63FF 0%, #43C6AC 100%);
+            --gradient-hover: linear-gradient(135deg, #5a52e0 0%, #3ab79e 100%);
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+            --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.2);
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            --border-radius: 16px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Header Styles with Sticky Effect */
+        header {
+            background: white;
+            color: var(--dark);
+            padding: 1rem 0;
+            box-shadow: var(--shadow-sm);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            transition: var(--transition);
+        }
+
+        header.scrolled {
+            padding: 0.5rem 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            color: var(--primary);
+        }
+
+        .logo i {
+            margin-right: 0.5rem;
+            font-size: 2rem;
+            transition: var(--transition);
+        }
+
+        .logo:hover i {
+            transform: rotate(-15deg);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-left: 2rem;
+            position: relative;
+        }
+
+        nav ul li a {
+            color: var(--dark);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 0.5rem 0;
+            position: relative;
+        }
+
+        nav ul li a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary);
+            transition: width 0.4s ease;
+        }
+
+        nav ul li a:hover::after {
+            width: 100%;
+        }
+
+        nav ul li a:hover {
+            color: var(--primary);
+        }
+
+        .auth-buttons .btn {
+            margin-left: 1rem;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 500;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .btn-outline {
+            border: 2px solid var(--primary);
+            background: transparent;
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+        }
+
+        .btn-solid {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+        }
+
+        .btn-solid:hover {
+            background: var(--gradient-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(108, 99, 255, 0.4);
+        }
+
+        /* Hamburger Menu for Mobile */
+        .hamburger {
+            display: none;
+            cursor: pointer;
+            width: 30px;
+            height: 20px;
+            position: relative;
+            z-index: 1001;
+        }
+
+        .hamburger span {
+            display: block;
+            position: absolute;
+            height: 3px;
+            width: 100%;
+            background: var(--primary);
+            border-radius: 3px;
+            opacity: 1;
+            left: 0;
+            transform: rotate(0deg);
+            transition: var(--transition);
+        }
+
+        .hamburger span:nth-child(1) {
+            top: 0;
+        }
+
+        .hamburger span:nth-child(2), .hamburger span:nth-child(3) {
+            top: 10px;
+        }
+
+        .hamburger span:nth-child(4) {
+            top: 20px;
+        }
+
+        .hamburger.open span:nth-child(1) {
+            top: 10px;
+            width: 0%;
+            left: 50%;
+        }
+
+        .hamburger.open span:nth-child(2) {
+            transform: rotate(45deg);
+        }
+
+        .hamburger.open span:nth-child(3) {
+            transform: rotate(-45deg);
+        }
+
+        .hamburger.open span:nth-child(4) {
+            top: 10px;
+            width: 0%;
+            left: 50%;
+        }
+
+        /* Hero Section with Background Image and Gradient Overlay */
+        .hero {
+            background: url('https://images.unsplash.com/photo-1506929562872-bb421503ef21?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') no-repeat center center/cover;
+            height: 100vh;
+            min-height: 700px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            color: white;
+            margin-top: 0;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.3));
+        }
+
+        .hero-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            max-width: 600px;
+            margin-bottom: 2.5rem;
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .search-bar {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 0.5rem;
+            display: flex;
+            max-width: 700px;
+            box-shadow: var(--shadow-lg);
+            transition: var(--transition);
+        }
+
+        .search-bar:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        .search-bar input {
+            flex: 1;
+            border: none;
+            padding: 1.2rem;
+            border-radius: var(--border-radius) 0 0 var(--border-radius);
+            outline: none;
+            font-size: 1.1rem;
+        }
+
+        .search-bar button {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            padding: 0 2.5rem;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .search-bar button:hover {
+            background: var(--gradient-hover);
+        }
+
+        /* Floating Particles Animation */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: float linear infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-1000px) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Features Section with 3D Card Effect */
+        .features {
+            max-width: 1400px;
+            margin: -80px auto 0;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2.5rem 2rem;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--gradient);
+            transition: var(--transition);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px) perspective(1000px) rotateX(5deg);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .feature-card:hover::before {
+            height: 10px;
+        }
+
+        .feature-icon {
+            width: 90px;
+            height: 90px;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: white;
+            font-size: 2rem;
+            transition: var(--transition);
+            box-shadow: 0 10px 20px rgba(108, 99, 255, 0.3);
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1) rotate(15deg);
+            box-shadow: 0 15px 30px rgba(108, 99, 255, 0.4);
+        }
+
+        .feature-card h3 {
+            margin-bottom: 1rem;
+            color: var(--dark);
+            font-size: 1.3rem;
+            transition: var(--transition);
+        }
+
+        .feature-card:hover h3 {
+            color: var(--primary);
+        }
+
+        .feature-card p {
+            color: var(--dark-light);
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1400px;
+            margin: 6rem auto;
+            padding: 0 2rem;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-title h2 {
+            font-size: 2.8rem;
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 5px;
+            background: var(--gradient);
+            border-radius: 3px;
+        }
+
+        .section-title p {
+            color: var(--dark-light);
+            max-width: 700px;
+            margin: 0 auto;
+            font-size: 1.1rem;
+        }
+
+        /* Travel Components with Hover Zoom Effect */
+        .travel-components {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2.5rem;
+            margin-bottom: 6rem;
+        }
+
+        .component-card {
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .component-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .component-header {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .component-card:hover .component-header {
+            transform: scale(1.05);
+        }
+
+        .component-header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.7));
+        }
+
+        .component-header h3 {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: white;
+            font-size: 1.7rem;
+            z-index: 1;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        .component-body {
+            padding: 2rem;
+        }
+
+        .component-body p {
+            color: var(--dark-light);
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+
+        .component-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.9rem 2rem;
+            background: var(--gradient);
+            color: white;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+        }
+
+        .component-btn:hover {
+            transform: translateY(-3px);
+            background: var(--gradient-hover);
+            box-shadow: 0 10px 25px rgba(108, 99, 255, 0.4);
+        }
+
+        .component-btn i {
+            transition: var(--transition);
+        }
+
+        .component-btn:hover i {
+            transform: translateX(3px);
+        }
+
+        /* Destinations with Flip Animation */
+        .destinations {
+            margin-bottom: 6rem;
+        }
+
+        .destination-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2.5rem;
+            perspective: 1000px;
+        }
+
+        .destination-card {
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            position: relative;
+            height: 350px;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: var(--transition);
+        }
+
+        .destination-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .destination-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .destination-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 2rem;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            color: white;
+            transform: translateY(0);
+            transition: var(--transition);
+        }
+
+        .destination-card:hover .destination-overlay {
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+        }
+
+        .destination-overlay h3 {
+            margin-bottom: 0.8rem;
+            font-size: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .destination-card:hover .destination-overlay h3 {
+            transform: translateY(-5px);
+        }
+
+        .destination-overlay p {
+            font-size: 1rem;
+            margin-bottom: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .destination-card:hover .destination-overlay p {
+            transform: translateY(-5px);
+        }
+
+        .price {
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: var(--accent);
+            transition: var(--transition);
+        }
+
+        .destination-card:hover .price {
+            color: var(--accent-dark);
+            transform: translateY(-5px);
+        }
+
+        .destination-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--secondary);
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            z-index: 1;
+            box-shadow: 0 4px 10px rgba(255, 101, 132, 0.3);
+        }
+
+        /* Testimonials with Swipe Effect */
+        .testimonials {
+            background: var(--gradient);
+            padding: 6rem 0;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .testimonials::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://images.unsplash.com/photo-1506929562872-bb421503ef21?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') no-repeat center center/cover;
+            opacity: 0.1;
+            z-index: 0;
+        }
+
+        .testimonial-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .testimonial-slider {
+            display: flex;
+            gap: 2rem;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            padding: 1rem 0;
+            margin-top: 3rem;
+        }
+
+        .testimonial-slider::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .testimonial-slider::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .testimonial-slider::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+
+        .testimonial-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: var(--border-radius);
+            padding: 2.5rem;
+            transition: var(--transition);
+            min-width: 350px;
+            scroll-snap-align: start;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .testimonial-text {
+            font-style: italic;
+            margin-bottom: 2rem;
+            position: relative;
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        .testimonial-text::before,
+        .testimonial-text::after {
+            content: '"';
+            font-size: 3rem;
+            color: rgba(255, 255, 255, 0.3);
+            position: absolute;
+            font-family: serif;
+        }
+
+        .testimonial-text::before {
+            top: -25px;
+            left: -15px;
+        }
+
+        .testimonial-text::after {
+            bottom: -45px;
+            right: -15px;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+        }
+
+        .author-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 1.5rem;
+            border: 3px solid white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .author-info h4 {
+            margin-bottom: 0.3rem;
+            font-size: 1.2rem;
+        }
+
+        .author-info p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Newsletter with Confetti Effect */
+        .newsletter {
+            max-width: 1400px;
+            margin: 6rem auto;
+            padding: 0 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .newsletter-form {
+            display: flex;
+            max-width: 600px;
+            margin: 3rem auto 0;
+            box-shadow: var(--shadow-lg);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            transition: var(--transition);
+            position: relative;
+            z-index: 1;
+        }
+
+        .newsletter-form:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .newsletter-form input {
+            flex: 1;
+            padding: 1.2rem 1.5rem;
+            border: none;
+            outline: none;
+            font-size: 1.1rem;
+        }
+
+        .newsletter-form button {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            padding: 0 2.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .newsletter-form button:hover {
+            background: var(--gradient-hover);
+        }
+
+        .newsletter-form button i {
+            transition: var(--transition);
+        }
+
+        .newsletter-form button:hover i {
+            transform: translateX(3px);
+        }
+
+        /* Confetti Effect */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--primary);
+            opacity: 0;
+        }
+
+        /* Footer with Wave Design */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 8rem 0 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer-wave {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z' opacity='.25' fill='%23ffffff'%3E%3C/path%3E%3Cpath d='M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z' opacity='.5' fill='%23ffffff'%3E%3C/path%3E%3Cpath d='M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z' fill='%23ffffff'%3E%3C/path%3E%3C/svg%3E");
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+
+        .footer-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 3rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer-col h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1.8rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .footer-col h3::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 50px;
+            height: 4px;
+            background: var(--gradient);
+            border-radius: 2px;
+        }
+
+        .footer-col ul {
+            list-style: none;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 1rem;
+        }
+
+        .footer-col ul li a {
+            color: #a0aec0;
+            text-decoration: none;
+            transition: var(--transition);
+            display: inline-block;
+        }
+
+        .footer-col ul li a:hover {
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .footer-about p {
+            color: #a0aec0;
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .social-links a {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            transition: var(--transition);
+            font-size: 1.2rem;
+        }
+
+        .social-links a:hover {
+            background: var(--primary);
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.4);
+        }
+
+        .copyright {
+            text-align: center;
+            margin-top: 5rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #a0aec0;
+            font-size: 0.9rem;
+        }
+
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: var(--gradient);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: var(--transition);
+            opacity: 0;
+            visibility: hidden;
+            z-index: 999;
+            box-shadow: 0 5px 20px rgba(108, 99, 255, 0.4);
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-5px);
+            background: var(--gradient-hover);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .feature-card, .component-card, .destination-card, .testimonial-card {
+            animation: fadeIn 0.8s ease-out forwards;
+            opacity: 0;
+        }
+
+        .feature-card:nth-child(1) { animation-delay: 0.1s; }
+        .feature-card:nth-child(2) { animation-delay: 0.2s; }
+        .feature-card:nth-child(3) { animation-delay: 0.3s; }
+        .feature-card:nth-child(4) { animation-delay: 0.4s; }
+
+        .component-card:nth-child(1) { animation-delay: 0.2s; }
+        .component-card:nth-child(2) { animation-delay: 0.3s; }
+        .component-card:nth-child(3) { animation-delay: 0.4s; }
+        .component-card:nth-child(4) { animation-delay: 0.5s; }
+
+        .destination-card:nth-child(1) { animation-delay: 0.1s; }
+        .destination-card:nth-child(2) { animation-delay: 0.2s; }
+        .destination-card:nth-child(3) { animation-delay: 0.3s; }
+        .destination-card:nth-child(4) { animation-delay: 0.4s; }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .hero h1 {
+                font-size: 3.5rem;
+            }
+            
+            .section-title h2 {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .hero h1 {
+                font-size: 3rem;
+            }
+            
+            .hero p {
+                font-size: 1.1rem;
+            }
+            
+            .feature-card {
+                padding: 2rem 1.5rem;
+            }
+            
+            .destination-card {
+                height: 300px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hamburger {
+                display: block;
+            }
+            
+            nav {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 80%;
+                max-width: 350px;
+                height: 100vh;
+                background: white;
+                box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
+                transition: var(--transition);
+                z-index: 1000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            nav.active {
+                right: 0;
+            }
+            
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+                padding: 2rem;
+                width: 100%;
+            }
+            
+            nav ul li {
+                margin: 1rem 0;
+            }
+            
+            nav ul li a {
+                color: var(--dark);
+                font-size: 1.2rem;
+            }
+            
+            .auth-buttons {
+                display: none;
+            }
+            
+            .header-content {
+                padding: 1rem;
+            }
+            
+            .hero {
+                height: 80vh;
+                min-height: 600px;
+                text-align: center;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero p {
+                margin: 0 auto 2rem;
+            }
+            
+            .features {
+                margin-top: 0;
+            }
+            
+            .section-title h2 {
+                font-size: 2.2rem;
+            }
+            
+            .testimonial-card {
+                min-width: 300px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hero {
+                height: 70vh;
+                min-height: 500px;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .search-bar {
+                flex-direction: column;
+                border-radius: var(--border-radius);
+            }
+            
+            .search-bar input {
+                border-radius: var(--border-radius) var(--border-radius) 0 0;
+            }
+            
+            .search-bar button {
+                border-radius: 0 0 var(--border-radius) var(--border-radius);
+                padding: 1rem;
+                justify-content: center;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .travel-components {
+                grid-template-columns: 1fr;
+            }
+            
+            .destination-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .newsletter-form {
+                flex-direction: column;
+                border-radius: var(--border-radius);
+            }
+            
+            .newsletter-form input {
+                border-radius: var(--border-radius) var(--border-radius) 0 0;
+            }
+            
+            .newsletter-form button {
+                border-radius: 0 0 var(--border-radius) var(--border-radius);
+                padding: 1rem;
+                justify-content: center;
+            }
+            
+            .section-title h2 {
+                font-size: 1.8rem;
+            }
+            
+            .section-title h2::after {
+                width: 80px;
+                height: 3px;
+                bottom: -10px;
+            }
+            
+            .testimonial-card {
+                min-width: 250px;
+                padding: 1.5rem;
+            }
+            
+            .footer-container {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            
+            .footer-col h3::after {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            
+            .social-links {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header id="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-plane"></i>
+                <span>Smart Trip</span>
+            </div>
+            <nav id="nav">
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#destinations">Destinations</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#testimonials">Testimonials</a></li>
+                    <li><a href="#newsletter">Contact</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons">
+                <button class="btn btn-outline"><a href="login.html" style="text-decoration: none;">Login</a></button>
+                <button class="btn btn-solid"><a href="login.html" style="text-decoration: none;">Sign up</a></button>
+            </div>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="particles" id="particles"></div>
+        <div class="hero-content">
+            <h1>Discover Your Next Adventure</h1>
+            <p>Explore the world with our comprehensive travel tools and services. Find the best deals, plan your itinerary, and make unforgettable memories.</p>
+            <div class="search-bar">
+                <input type="text" placeholder="Search destinations, hotels, activities...">
+                <button><i class="fas fa-search"></i> Search</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                <h3>Plan Expenses</h3>
+                <p>Track and manage your travel budget with our intuitive expense planner to make the most of your trip.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-map-marked-alt"></i>
+                </div>
+                <h3>Real-Time Directions</h3>
+                <p>Never get lost with our live navigation system that works offline and provides local insights.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-hotel"></i>
+                </div>
+                <h3>Hotel Booking</h3>
+                <p>Find and book the perfect accommodation from luxury resorts to cozy homestays worldwide.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-ticket-alt"></i>
+                </div>
+                <h3>Ticket Booking</h3>
+                <p>Book flights, trains, buses and event tickets across all platforms with our aggregated system.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Travel Components Section -->
+        <section>
+            <div class="section-title">
+                <h2>Travel Tools</h2>
+                <p>Our comprehensive suite of travel tools makes planning and enjoying your trip effortless</p>
+            </div>
+            <div class="travel-components">
+                <div class="component-card">
+                    <div class="component-header" style="background-image: url('https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');">
+                        <h3>Expense Planner</h3>
+                    </div>
+                    <div class="component-body">
+                        <p>Plan your travel budget with our interactive expense tracker. Set daily limits, categorize expenses, and get real-time spending alerts to stay on budget throughout your journey.</p>
+                        <button class="component-btn">Start Planning <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+                <div class="component-card">
+                    <div class="component-header" style="background-image: url('https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');">
+                        <h3>Real-time direction</h3>
+                    </div>
+                    <div class="component-body">
+                        <p>Get turn-by-turn directions with our real-time navigation system that works offline. Discover local attractions, restaurants, and hidden gems along your route.</p>
+                        <a href="food.html"><button class="component-btn">Explore Now <i class="fas fa-arrow-right"></i></button> </a>
+                    </div>
+                </div>
+                <div class="component-card">
+                    <div class="component-header" style="background-image: url('https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');">
+                        <h3>Hotel booking</h3>
+                    </div>
+                    <div class="component-body">
+                        <p>Compare prices from hundreds of booking sites to find your perfect stay. Filter by amenities, location, and reviews to book with confidence.</p>
+                        <button class="component-btn">Find Hotels <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+                <div class="component-card">
+                    <div class="component-header" style="background-image: url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');">
+                        <h3>Ticket booking </h3>
+                    </div>
+                    <div class="component-body">
+                        <p>One-stop shop for all your travel tickets. Book flights, trains, buses, and event tickets across all major platforms with our price comparison tool.</p>
+                        <button class="component-btn">Book Tickets <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Popular Destinations -->
+        <section class="destinations" id="destinations">
+            <div class="section-title">
+                <h2>Popular Destinations</h2>
+                <p>Discover these trending destinations that travelers are loving right now</p>
+            </div>
+            <div class="destination-grid">
+                <div class="destination-card">
+                    <div class="destination-badge">Trending</div>
+                    <img src="https://images.unsplash.com/photo-1503917988258-f87a78e3c995?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Bali" class="destination-img">
+                    <div class="destination-overlay">
+                        <h3>Bali, Indonesia</h3>
+                        <p>Island of Gods with beautiful beaches and rich culture</p>
+                        <p class="price">From $799</p>
+                    </div>
+                </div>
+                <div class="destination-card">
+                    <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Paris" class="destination-img">
+                    <div class="destination-overlay">
+                        <h3>Paris, France</h3>
+                        <p>The romantic city of lights and iconic landmarks</p>
+                        <p class="price">From $1099</p>
+                    </div>
+                </div>
+                <div class="destination-card">
+                    <div class="destination-badge">Popular</div>
+                    <img src="https://images.unsplash.com/photo-1518391846015-55a9cc003b25?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Tokyo" class="destination-img">
+                    <div class="destination-overlay">
+                        <h3>Tokyo, Japan</h3>
+                        <p>Where ancient tradition meets cutting-edge technology</p>
+                        <p class="price">From $1299</p>
+                    </div>
+                </div>
+                <div class="destination-card">
+                    <img src="https://images.unsplash.com/photo-1516483638261-f4dbaf036963?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="New York" class="destination-img">
+                    <div class="destination-overlay">
+                        <h3>New York, USA</h3>
+                        <p>The city that never sleeps with endless possibilities</p>
+                        <p class="price">From $899</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Testimonials -->
+    <section class="testimonials" id="testimonials">
+        <div class="testimonial-container">
+            <div class="section-title">
+                <h2>Traveler Stories</h2>
+                <p>Hear what our community has to say about their experiences</p>
+            </div>
+            <div class="testimonial-slider">
+                <div class="testimonial-card">
+                    <div class="testimonial-text">
+                        The expense planner helped me save over $500 on my Europe trip by identifying unnecessary spending. The real-time directions were a lifesaver in Venice's canals!
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="https://randomuser.me/api/portraits/women/32.jpg" alt="Sarah J." class="author-img">
+                        <div class="author-info">
+                            <h4>Sarah J.</h4>
+                            <p>Traveled to 15 countries</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-text">
+                        Booking through their aggregated system saved me hours of comparing prices across different sites. Got the best deal on flights and hotels for our family vacation.
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="https://randomuser.me/api/portraits/men/44.jpg" alt="Michael T." class="author-img">
+                        <div class="author-info">
+                            <h4>Michael T.</h4>
+                            <p>Family travel expert</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-text">
+                        As a solo traveler, the safety features in the navigation app gave me peace of mind. The local recommendations led me to amazing hidden spots I'd never find otherwise.
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Priya K." class="author-img">
+                        <div class="author-info">
+                            <h4>Priya K.</h4>
+                            <p>Solo traveler</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-text">
+                        The hotel finder helped us discover the most charming boutique hotels in Italy that weren't even listed on major booking platforms. Truly unique experiences!
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="https://randomuser.me/api/portraits/men/22.jpg" alt="David L." class="author-img">
+                        <div class="author-info">
+                            <h4>David L.</h4>
+                            <p>Luxury travel blogger</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter -->
+    <section class="newsletter" id="newsletter">
+        <div class="section-title">
+            <h2>Stay Updated</h2>
+            <p>Subscribe to our newsletter for travel tips, exclusive deals, and destination inspiration</p>
+        </div>
+        <form class="newsletter-form" id="newsletterForm">
+            <input type="email" placeholder="Enter your email address" required>
+            <button type="submit"><i class="fas fa-paper-plane"></i> Subscribe</button>
+        </form>
+        <div id="confetti-container"></div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-wave"></div>
+        <div class="footer-container">
+            <div class="footer-col footer-about">
+                <h3>Smart Trip</h3>
+                <p>Your ultimate travel companion for planning, booking, and experiencing unforgettable journeys around the world.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h3>Services</h3>
+                <ul>
+                    <li><a href="#">Expense Planning</a></li>
+                    <li><a href="#">Real-Time direction</a></li>
+                    <li><a href="#">Hotel Booking</a></li>
+                    <li><a href="#">Ticket Aggregator</a></li>
+                    <li><a href="#">Travel Insurance</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>Support</h3>
+                <ul>
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">Safety Information</a></li>
+                    <li><a href="#">Cancellation Options</a></li>
+                    <li><a href="#">Report Issue</a></li>
+                    <li><a href="#">Contact Us</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>Company</h3>
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="#">Blog</a></li>
+                    <li><a href="#">Press</a></li>
+                    <li><a href="#">Partners</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright">
+            &copy; 2023 Smart Trip. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <div class="back-to-top" id="backToTop">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile Menu Toggle
+            const hamburger = document.getElementById('hamburger');
+            const nav = document.getElementById('nav');
+            
+            hamburger.addEventListener('click', function() {
+                this.classList.toggle('open');
+                nav.classList.toggle('active');
+            });
+            
+            // Close mobile menu when clicking on a link
+            document.querySelectorAll('nav ul li a').forEach(link => {
+                link.addEventListener('click', () => {
+                    hamburger.classList.remove('open');
+                    nav.classList.remove('active');
+                });
+            });
+            
+            // Sticky Header
+            const header = document.getElementById('header');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+            
+            // Back to Top Button
+            const backToTop = document.getElementById('backToTop');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 300) {
+                    backToTop.classList.add('visible');
+                } else {
+                    backToTop.classList.remove('visible');
+                }
+            });
+            
+            backToTop.addEventListener('click', function() {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+            
+            // Floating Particles Animation
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 30;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Random properties
+                const size = Math.random() * 5 + 3;
+                const posX = Math.random() * 100;
+                const delay = Math.random() * 5;
+                const duration = Math.random() * 10 + 10;
+                const opacity = Math.random() * 0.5 + 0.3;
+                
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${posX}%`;
+                particle.style.animationDelay = `${delay}s`;
+                particle.style.animationDuration = `${duration}s`;
+                particle.style.opacity = opacity;
+                
+                // Random color from gradient
+                const colors = ['#6C63FF', '#43C6AC', '#FF6584', '#ffffff'];
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.background = randomColor;
+                
+                particlesContainer.appendChild(particle);
+            }
+            
+            // Newsletter Form with Confetti
+            const newsletterForm = document.getElementById('newsletterForm');
+            const confettiContainer = document.getElementById('confetti-container');
+            
+            newsletterForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const emailInput = this.querySelector('input[type="email"]');
+                
+                if (emailInput.value && emailInput.value.includes('@')) {
+                    // Show success message
+                    alert('Thank you for subscribing! You\'ll receive our next newsletter soon.');
+                    emailInput.value = '';
+                    
+                    // Create confetti effect
+                    createConfetti();
+                } else {
+                    alert('Please enter a valid email address.');
+                }
+            });
+            
+            function createConfetti() {
+                confettiContainer.innerHTML = '';
+                const colors = ['#6C63FF', '#43C6AC', '#FF6584', '#FFD166', '#06D6A0'];
+                
+                for (let i = 0; i < 50; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.classList.add('confetti');
+                    
+                    // Random properties
+                    const size = Math.random() * 10 + 5;
+                    const posX = Math.random() * 100;
+                    const delay = Math.random() * 0.5;
+                    const duration = Math.random() * 1 + 0.5;
+                    const rotation = Math.random() * 360;
+                    
+                    confetti.style.width = `${size}px`;
+                    confetti.style.height = `${size}px`;
+                    confetti.style.left = `${posX}%`;
+                    confetti.style.animationDelay = `${delay}s`;
+                    confetti.style.animationDuration = `${duration}s`;
+                    confetti.style.transform = `rotate(${rotation}deg)`;
+                    confetti.style.opacity = '1';
+                    
+                    // Random shape
+                    if (Math.random() > 0.5) {
+                        confetti.style.borderRadius = '50%';
+                    }
+                    
+                    // Random color
+                    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.background = randomColor;
+                    
+                    confettiContainer.appendChild(confetti);
+                    
+                    // Remove confetti after animation
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, duration * 1000);
+                }
+            }
+            
+            // Animate elements when they come into view
+            const animateOnScroll = function() {
+                const elements = document.querySelectorAll('.feature-card, .component-card, .destination-card, .testimonial-card');
+                
+                elements.forEach(element => {
+                    const elementPosition = element.getBoundingClientRect().top;
+                    const windowHeight = window.innerHeight;
+                    
+                    if (elementPosition < windowHeight - 100) {
+                        element.style.opacity = '1';
+                        element.style.transform = 'translateY(0)';
+                    }
+                });
+            };
+            
+            // Run once on load
+            animateOnScroll();
+            
+            // Run on scroll
+            window.addEventListener('scroll', animateOnScroll);
+            
+            // Component card buttons - simulate functionality
+            document.querySelectorAll('.component-btn').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const cardTitle = this.closest('.component-card').querySelector('h3').textContent;
+                    alert(`You clicked on "${cardTitle}". Login to open`);
+                });
+            });
+            
+            // Destination card hover effect enhancement
+            document.querySelectorAll('.destination-card').forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.querySelector('.destination-overlay').style.opacity = '1';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.querySelector('.destination-overlay').style.opacity = '0';
+                });
+            });
+            
+            // Testimonial slider navigation
+            let isDown = false;
+            let startX;
+            let scrollLeft;
+            const slider = document.querySelector('.testimonial-slider');
+            
+            slider.addEventListener('mousedown', (e) => {
+                isDown = true;
+                slider.style.cursor = 'grabbing';
+                startX = e.pageX - slider.offsetLeft;
+                scrollLeft = slider.scrollLeft;
+            });
+            
+            slider.addEventListener('mouseleave', () => {
+                isDown = false;
+                slider.style.cursor = 'grab';
+            });
+            
+            slider.addEventListener('mouseup', () => {
+                isDown = false;
+                slider.style.cursor = 'grab';
+            });
+            
+            slider.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - slider.offsetLeft;
+                const walk = (x - startX) * 2;
+                slider.scrollLeft = scrollLeft - walk;
+            });
+            
+            // Touch events for mobile
+            slider.addEventListener('touchstart', (e) => {
+                isDown = true;
+                startX = e.touches[0].pageX - slider.offsetLeft;
+                scrollLeft = slider.scrollLeft;
+            });
+            
+            slider.addEventListener('touchend', () => {
+                isDown = false;
+            });
+            
+            slider.addEventListener('touchmove', (e) => {
+                if (!isDown) return;
+                const x = e.touches[0].pageX - slider.offsetLeft;
+                const walk = (x - startX) * 2;
+                slider.scrollLeft = scrollLeft - walk;
+            });
+            
+            // Pulse animation for featured cards
+            setInterval(() => {
+                const randomCard = document.querySelectorAll('.feature-card')[Math.floor(Math.random() * 4)];
+                randomCard.style.animation = 'pulse 1s ease';
+                setTimeout(() => {
+                    randomCard.style.animation = '';
+                }, 1000);
+            }, 3000);
+        });
+    </script>
+</body>
+</html>

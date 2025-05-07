@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Trip | Real-Time Directions</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Base Styles with Enhanced Variables */
+        :root {
+            --primary: #6C63FF;
+            --primary-light: #8a84ff;
+            --secondary: #FF6584;
+            --accent: #43C6AC;
+            --accent-dark: #2fa58f;
+            --dark: #2D3748;
+            --dark-light: #4a5568;
+            --light: #F7FAFC;
+            --gradient: linear-gradient(135deg, #6C63FF 0%, #43C6AC 100%);
+            --gradient-hover: linear-gradient(135deg, #5a52e0 0%, #3ab79e 100%);
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+            --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.2);
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            --border-radius: 16px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Header Styles with Sticky Effect */
+        header {
+            background: white;
+            color: var(--dark);
+            padding: 1rem 0;
+            box-shadow: var(--shadow-sm);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            transition: var(--transition);
+        }
+
+        header.scrolled {
+            padding: 0.5rem 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            color: var(--primary);
+        }
+
+        .logo i {
+            margin-right: 0.5rem;
+            font-size: 2rem;
+            transition: var(--transition);
+        }
+
+        .logo:hover i {
+            transform: rotate(-15deg);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-left: 2rem;
+            position: relative;
+        }
+
+        nav ul li a {
+            color: var(--dark);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 0.5rem 0;
+            position: relative;
+        }
+
+        nav ul li a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary);
+            transition: width 0.4s ease;
+        }
+
+        nav ul li a:hover::after {
+            width: 100%;
+        }
+
+        nav ul li a:hover {
+            color: var(--primary);
+        }
+
+        .btn-outline {
+            border: 2px solid var(--primary);
+            background: transparent;
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+        }
+
+        .btn-solid {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+        }
+
+        .btn-solid:hover {
+            background: var(--gradient-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(108, 99, 255, 0.4);
+        }
+
+        /* Hamburger Menu for Mobile */
+        .hamburger {
+            display: none;
+            cursor: pointer;
+            width: 30px;
+            height: 20px;
+            position: relative;
+            z-index: 1001;
+        }
+
+        .hamburger span {
+            display: block;
+            position: absolute;
+            height: 3px;
+            width: 100%;
+            background: var(--primary);
+            border-radius: 3px;
+            opacity: 1;
+            left: 0;
+            transform: rotate(0deg);
+            transition: var(--transition);
+        }
+
+        .hamburger span:nth-child(1) {
+            top: 0;
+        }
+
+        .hamburger span:nth-child(2), .hamburger span:nth-child(3) {
+            top: 10px;
+        }
+
+        .hamburger span:nth-child(4) {
+            top: 20px;
+        }
+
+        .hamburger.open span:nth-child(1) {
+            top: 10px;
+            width: 0%;
+            left: 50%;
+        }
+
+        .hamburger.open span:nth-child(2) {
+            transform: rotate(45deg);
+        }
+
+        .hamburger.open span:nth-child(3) {
+            transform: rotate(-45deg);
+        }
+
+        .hamburger.open span:nth-child(4) {
+            top: 10px;
+            width: 0%;
+            left: 50%;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1400px;
+            margin: 6rem auto;
+            padding: 0 2rem;
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .page-header h1 {
+            font-size: 2.8rem;
+            color: var(--dark);
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            position: relative;
+        }
+
+        .page-header h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 80px;
+            height: 4px;
+            background: var(--gradient);
+            border-radius: 2px;
+        }
+
+        /* Directions Section */
+        .directions-section {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2.5rem;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            animation: fadeIn 0.8s ease-out forwards;
+            opacity: 0;
+        }
+
+        .directions-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--gradient);
+            transition: var(--transition);
+        }
+
+        .directions-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .directions-section:hover::before {
+            height: 8px;
+        }
+
+        .section-title {
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-title i {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+            transition: var(--transition);
+        }
+
+        .section-title:hover i {
+            transform: scale(1.1) rotate(10deg);
+        }
+
+        .section-title h2 {
+            font-size: 1.8rem;
+            color: var(--dark);
+            transition: var(--transition);
+        }
+
+        .section-title:hover h2 {
+            color: var(--primary);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+            transition: var(--transition);
+        }
+
+        .form-group:hover label {
+            color: var(--primary);
+        }
+
+        .form-group input, 
+        .form-group select, 
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus, 
+        .form-group select:focus, 
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.2);
+        }
+
+        .form-group:hover input,
+        .form-group:hover select,
+        .form-group:hover textarea {
+            border-color: var(--primary-light);
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        .plan-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.9rem 2rem;
+            background: var(--gradient);
+            color: white;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .plan-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
+            transform: translateX(-100%);
+            transition: var(--transition);
+        }
+
+        .plan-btn:hover {
+            transform: translateY(-3px);
+            background: var(--gradient-hover);
+            box-shadow: 0 10px 25px rgba(108, 99, 255, 0.4);
+        }
+
+        .plan-btn:hover::after {
+            transform: translateX(100%);
+        }
+
+        .plan-btn i {
+            transition: var(--transition);
+        }
+
+        .plan-btn:hover i {
+            transform: translateX(3px);
+        }
+
+        /* Map and Results Layout */
+        .results-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 992px) {
+            .results-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Map Box */
+        .map-box {
+            height: 500px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .map-box:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Related Places Box */
+        .related-places {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            height: 500px;
+            overflow-y: auto;
+            transition: var(--transition);
+        }
+
+        .related-places:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .related-places h3 {
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .place-item {
+            padding: 1rem 0;
+            border-bottom: 1px solid #edf2f7;
+            animation: fadeIn 0.5s ease-out;
+            transition: var(--transition);
+        }
+
+        .place-item:hover {
+            background: rgba(108, 99, 255, 0.03);
+            transform: translateX(5px);
+        }
+
+        .place-item:last-child {
+            border-bottom: none;
+        }
+
+        .place-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .place-title {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .place-distance {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+
+        .place-details {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+            color: var(--dark-light);
+        }
+
+        .place-category {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.2rem 0.5rem;
+            background: rgba(67, 198, 172, 0.1);
+            border-radius: 50px;
+            color: var(--accent-dark);
+            font-size: 0.8rem;
+            transition: var(--transition);
+        }
+
+        .place-item:hover .place-category {
+            background: rgba(67, 198, 172, 0.2);
+            transform: scale(1.05);
+        }
+
+        .place-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            color: #FFC107;
+        }
+
+        .no-places {
+            text-align: center;
+            padding: 2rem;
+            color: var(--dark-light);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .page-header h1 {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hamburger {
+                display: block;
+            }
+            
+            nav {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 80%;
+                max-width: 350px;
+                height: 100vh;
+                background: white;
+                box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
+                transition: var(--transition);
+                z-index: 1000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            nav.active {
+                right: 0;
+            }
+            
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+                padding: 2rem;
+                width: 100%;
+            }
+            
+            nav ul li {
+                margin: 1rem 0;
+            }
+            
+            nav ul li a {
+                color: var(--dark);
+                font-size: 1.2rem;
+            }
+            
+            .header-content {
+                padding: 1rem;
+            }
+            
+            .main-content {
+                margin-top: 5rem;
+            }
+            
+            .page-header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .directions-section {
+                padding: 1.5rem;
+            }
+            
+            .section-title h2 {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .page-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .directions-section {
+                padding: 1.5rem 1rem;
+            }
+        }
+
+        /* Enhanced Map Controls */
+        .mapboxgl-ctrl-top-left {
+            top: 10px;
+            left: 10px;
+        }
+
+        .mapboxgl-ctrl-top-right {
+            top: 10px;
+            right: 10px;
+        }
+
+        .mapboxgl-ctrl-bottom-right {
+            bottom: 10px;
+            right: 10px;
+        }
+
+        .mapboxgl-ctrl-group {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .mapboxgl-ctrl-group button {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            background: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .mapboxgl-ctrl-group button:hover {
+            background-color: #f5f5f5;
+        }
+
+        .mapboxgl-ctrl-group button + button {
+            border-top: 1px solid #eee;
+        }
+
+        .mapboxgl-ctrl-icon {
+            font-size: 16px;
+            color: #333;
+        }
+
+        .mapboxgl-ctrl-geolocate {
+            color: #4285F4;
+        }
+
+        .mapboxgl-ctrl-geolocate:hover {
+            background-color: #e8f0fe;
+        }
+
+        /* Map Style Switcher */
+        .mapboxgl-ctrl-style-switcher {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .mapboxgl-ctrl-style-switcher button {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            background: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .mapboxgl-ctrl-style-switcher button:hover {
+            background-color: #f5f5f5;
+        }
+
+        .mapboxgl-ctrl-style-switcher button.active {
+            background-color: #e8f0fe;
+        }
+
+        /* Traffic Layer Control */
+        .mapboxgl-ctrl-traffic {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mapboxgl-ctrl-traffic label {
+            font-size: 14px;
+            color: #333;
+            cursor: pointer;
+        }
+
+        .mapboxgl-ctrl-traffic input {
+            margin: 0;
+            cursor: pointer;
+        }
+
+        /* Enhanced Marker Styles */
+        .mapboxgl-marker {
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .mapboxgl-marker:hover {
+            transform: scale(1.1);
+        }
+
+        /* Pulse animation for markers */
+        .pulse-marker {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--secondary);
+            position: relative;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.8); opacity: 0.7; }
+            70% { transform: scale(1.3); opacity: 0.3; }
+            100% { transform: scale(1.4); opacity: 0; }
+        }
+
+        /* Enhanced Popup Styles */
+        .mapboxgl-popup {
+            max-width: 300px !important;
+        }
+
+        .mapboxgl-popup-content {
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+        }
+
+        .mapboxgl-popup-close-button {
+            font-size: 1.2rem;
+            padding: 0 0.5rem;
+            color: var(--dark-light);
+            transition: var(--transition);
+        }
+
+        .mapboxgl-popup-close-button:hover {
+            color: var(--secondary);
+            background: none;
+        }
+
+        /* Place meta styles */
+        .place-meta {
+            display: flex;
+            justify-content: space-between;
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+        }
+
+        .place-status.open {
+            color: var(--accent-dark);
+        }
+
+        .place-status.closed {
+            color: var(--secondary);
+        }
+
+        .place-price {
+            color: var(--dark-light);
+        }
+
+        .plan-btn.small-btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Journey Controls */
+        .journey-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            display: flex;
+            gap: 1rem;
+            z-index: 10;
+            opacity: 0;
+            transition: var(--transition);
+        }
+        
+        .journey-controls.visible {
+            opacity: 1;
+        }
+        
+        .journey-progress {
+            width: 200px;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+        
+        .journey-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--gradient);
+            transition: width 0.3s linear;
+        }
+        
+        /* Building Labels */
+        .building-label {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #333;
+            text-shadow: 0 0 2px white;
+            pointer-events: none;
+        }
+        
+        /* Animation for moving car */
+        .car-marker {
+            width: 24px;
+            height: 24px;
+            background: var(--secondary);
+            border-radius: 50% 50% 0 50%;
+            transform: rotate(45deg);
+            position: relative;
+            animation: car-bounce 0.8s infinite alternate;
+        }
+        
+        .car-marker::before {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+        }
+        
+        @keyframes car-bounce {
+            from { transform: rotate(45deg) translateY(0); }
+            to { transform: rotate(45deg) translateY(-5px); }
+        }
+        
+        /* Pulsing effect for destination */
+        @keyframes pulse-destination {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(108, 99, 255, 0.7); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 15px rgba(108, 99, 255, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(108, 99, 255, 0); }
+        }
+        
+        .destination-marker {
+            animation: pulse-destination 2s infinite;
+        }
+
+        /* Marker styles */
+        .marker {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transform: translate(-50%, -50%);
+        }
+        
+        .source-marker {
+            background: #43C6AC;
+            color: white;
+            font-size: 16px;
+            box-shadow: 0 0 0 4px rgba(67, 198, 172, 0.3);
+            animation: pulse-source 2s infinite;
+        }
+        
+        .destination-marker {
+            background: #6C63FF;
+            color: white;
+            font-size: 16px;
+            box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.3);
+        }
+        
+        .pulse {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: inherit;
+            border-radius: inherit;
+            opacity: 0.8;
+            animation: pulse 2s infinite;
+            z-index: -1;
+        }
+        
+        @keyframes pulse-source {
+            0% { box-shadow: 0 0 0 0 rgba(67, 198, 172, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(67, 198, 172, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(67, 198, 172, 0); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            70% { transform: scale(2.5); opacity: 0; }
+            100% { transform: scale(2.5); opacity: 0; }
+        }
+
+        /* New Directions Info Section */
+        .directions-features {
+            margin-top: 3rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--gradient);
+            transition: var(--transition);
+        }
+
+        .feature-card:hover::before {
+            height: 8px;
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+            transition: var(--transition);
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1) rotate(10deg);
+        }
+
+        .feature-title {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+            transition: var(--transition);
+        }
+
+        .feature-card:hover .feature-title {
+            color: var(--primary);
+        }
+
+        .feature-desc {
+            color: var(--dark-light);
+            line-height: 1.7;
+        }
+
+        /* Tips Section */
+        .tips-section {
+            margin-top: 3rem;
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2.5rem;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tips-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--gradient);
+        }
+
+        .tips-title {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .tips-title i {
+            color: var(--primary);
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .tip-item {
+            padding: 1.5rem;
+            background: rgba(108, 99, 255, 0.05);
+            border-radius: 12px;
+            transition: var(--transition);
+        }
+
+        .tip-item:hover {
+            background: rgba(108, 99, 255, 0.1);
+            transform: translateY(-3px);
+        }
+
+        .tip-item h4 {
+            color: var(--primary);
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tip-item p {
+            color: var(--dark-light);
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header id="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-plane"></i>
+                <span>Smart Trip</span>
+            </div>
+            <nav id="nav">
+                <ul>
+                    <li><a href="afterhome.html">Home</a></li>
+                    <li><a href="#">Destinations</a></li>
+                    <li><a href="#">Features</a></li>
+                    <li><a href="expenseplan.html">Expenses Planner</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </nav>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1>Real-Time Directions</h1>
+        </div>
+
+        <!-- Directions Section -->
+        <section class="directions-section">
+            <div class="section-title">
+                <i class="fas fa-route"></i>
+                <h2>Get Directions</h2>
+            </div>
+            <p>Enter your starting point and destination to get real-time directions and nearby places.</p>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="source">Source</label>
+                    <input type="text" id="source" placeholder="Enter starting location">
+                    <button id="current-location" class="plan-btn small-btn" style="margin-top: 0.5rem;">
+                        <i class="fas fa-location-arrow"></i> Use Current Location
+                    </button>
+                </div>
+                <div class="form-group">
+                    <label for="destination">Destination</label>
+                    <input type="text" id="destination" placeholder="Enter destination">
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button class="plan-btn" id="get-directions">
+                    <i class="fas fa-directions"></i> Get Directions
+                </button>
+            </div>
+            
+            <div class="results-container">
+                <div class="map-container">
+                    <!-- Map will be inserted here -->
+                </div>
+                
+                <div class="related-places">
+                    <h3><i class="fas fa-map-marker-alt"></i> Nearby Places</h3>
+                    <div id="places-container">
+                        <div class="no-places">
+                            <p>Search for directions to see nearby places at your destination</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Directions Features Section -->
+        <section class="directions-features">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-map-marked-alt"></i>
+                </div>
+                <h3 class="feature-title">Interactive Maps</h3>
+                <p class="feature-desc">Our interactive maps provide real-time updates and multiple route options to help you choose the best path to your destination.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-traffic-light"></i>
+                </div>
+                <h3 class="feature-title">Live Traffic Updates</h3>
+                <p class="feature-desc">Get live traffic conditions and estimated travel times that adjust automatically based on current road conditions.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-utensils"></i>
+                </div>
+                <h3 class="feature-title">Nearby Points of Interest</h3>
+                <p class="feature-desc">Discover restaurants, attractions, and services near your destination to enhance your travel experience.</p>
+            </div>
+        </section>
+
+        <!-- Travel Tips Section -->
+        <section class="tips-section">
+            <h2 class="tips-title"><i class="fas fa-lightbulb"></i> Smart Travel Tips</h2>
+            
+            <div class="tips-grid">
+                <div class="tip-item">
+                    <h4><i class="fas fa-clock"></i> Plan Ahead</h4>
+                    <p>Check traffic patterns and consider alternate routes before you leave. Morning and evening commutes often have heavier traffic.</p>
+                </div>
+                
+                <div class="tip-item">
+                    <h4><i class="fas fa-gas-pump"></i> Fuel Stops</h4>
+                    <p>Plan your fuel stops along the route, especially for long trips. Our system can show you gas stations along your path.</p>
+                </div>
+                
+                <div class="tip-item">
+                    <h4><i class="fas fa-umbrella-beach"></i> Rest Areas</h4>
+                    <p>Take breaks every 2 hours on long trips. Our directions include recommended rest stops to keep you refreshed.</p>
+                </div>
+                
+                <div class="tip-item">
+                    <h4><i class="fas fa-mobile-alt"></i> Offline Access</h4>
+                    <p>Download your route for offline access in case you lose internet connection during your journey.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const API_KEY = 'AIzaSyCQ8njadJwk5j3mMOh1CwKiXbho7zmsJ5A';
+    
+    // DOM Elements
+    const sourceInput = document.getElementById('source');
+    const destinationInput = document.getElementById('destination');
+    const currentLocationBtn = document.getElementById('current-location');
+    const getDirectionsBtn = document.getElementById('get-directions');
+    const mapContainer = document.querySelector('.map-container');
+    const placesContainer = document.getElementById('places-container');
+    
+    // Hamburger menu functionality
+    const hamburger = document.getElementById('hamburger');
+    const nav = document.getElementById('nav');
+    
+    if (hamburger) {
+        hamburger.addEventListener('click', function() {
+            this.classList.toggle('active');
+            nav.classList.toggle('active');
+        });
+    }
+    
+    // Function to get directions embed
+    async function getDirectionsEmbed(origin, destination, apiKey, width = 600, height = 450) {
+        if (!origin || !destination || !apiKey) {
+            throw new Error('Missing required parameters: origin, destination, or API key');
+        }
+
+        try {
+            const originResponse = await fetch(
+                `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(origin)}&key=${apiKey}`
+            );
+            const originData = await originResponse.json();
+
+            if (originData.status !== 'OK') {
+                throw new Error(`Failed to get place ID for origin: ${originData.status}`);
+            }
+            
+            const originPlaceId = originData.results[0].place_id;
+
+            const destinationResponse = await fetch(
+                `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(destination)}&key=${apiKey}`
+            );
+            const destinationData = await destinationResponse.json();
+
+            if (destinationData.status !== 'OK') {
+                throw new Error(`Failed to get place ID for destination: ${destinationData.status}`);
+            }
+            
+            const destinationPlaceId = destinationData.results[0].place_id;
+
+            const iframeHtml = `<iframe 
+                width="${width}" 
+                height="${height}" 
+                style="border:0" 
+                loading="lazy" 
+                allowfullscreen
+                src="https://www.google.com/maps/embed/v1/directions?origin=place_id:${originPlaceId}&destination=place_id:${destinationPlaceId}&key=${apiKey}">
+            </iframe>`;
+
+            return iframeHtml;
+        } catch (error) {
+            console.error('Error generating directions embed:', error);
+            throw error;
+        }
+    }
+    
+    // Function to get current location
+    currentLocationBtn.addEventListener('click', function() {
+        if (navigator.geolocation) {
+            currentLocationBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting location...';
+            
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    // Get address from coordinates (reverse geocoding)
+                    fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${API_KEY}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === 'OK') {
+                                const address = data.results[0].formatted_address;
+                                sourceInput.value = address;
+                            } else {
+                                sourceInput.value = `${lat}, ${lng}`;
+                            }
+                            currentLocationBtn.innerHTML = '<i class="fas fa-location-arrow"></i> Use Current Location';
+                        })
+                        .catch(error => {
+                            console.error('Error getting address:', error);
+                            sourceInput.value = `${lat}, ${lng}`;
+                            currentLocationBtn.innerHTML = '<i class="fas fa-location-arrow"></i> Use Current Location';
+                        });
+                },
+                function(error) {
+                    console.error('Error getting location:', error);
+                    alert('Unable to get your location. Please check your browser permissions.');
+                    currentLocationBtn.innerHTML = '<i class="fas fa-location-arrow"></i> Use Current Location';
+                }
+            );
+        } else {
+            alert('Geolocation is not supported by your browser.');
+        }
+    });
+    
+    function getRatingStars(rating) {
+        const fullStars = Math.floor(rating);
+        const halfStar = rating % 1 >= 0.5;
+        const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+        
+        let starsHTML = '';
+        
+        for (let i = 0; i < fullStars; i++) {
+            starsHTML += '<i class="fas fa-star"></i>';
+        }
+        
+        if (halfStar) {
+            starsHTML += '<i class="fas fa-star-half-alt"></i>';
+        }
+        
+        for (let i = 0; i < emptyStars; i++) {
+            starsHTML += '<i class="far fa-star"></i>';
+        }
+        
+        return starsHTML;
+    }
+    
+    function capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+    
+    async function getNearbyPlaces(location) {
+        try {
+            const placeTypes = [
+                { type: 'restaurant', icon: 'fa-utensils' },
+                { type: 'hotel', icon: 'fa-hotel' },
+                { type: 'attraction', icon: 'fa-monument' },
+                { type: 'cafe', icon: 'fa-coffee' }
+            ];
+            
+            const dummyPlaces = [
+                { name: 'Central Restaurant', rating: 4.5, type: 'restaurant', distance: '0.2 mi' },
+                { name: 'Grand Hotel', rating: 4.2, type: 'hotel', distance: '0.5 mi' },
+                { name: 'City Museum', rating: 4.7, type: 'attraction', distance: '0.3 mi' },
+                { name: 'Cozy Cafe', rating: 4.3, type: 'cafe', distance: '0.1 mi' },
+                { name: 'Sunset Restaurant', rating: 4.1, type: 'restaurant', distance: '0.4 mi' },
+                { name: 'Historic Tower', rating: 4.8, type: 'attraction', distance: '0.6 mi' }
+            ];
+            
+            let placesHTML = '';
+            
+            dummyPlaces.forEach(place => {
+                const placeType = placeTypes.find(t => t.type === place.type);
+                const icon = placeType ? placeType.icon : 'fa-map-marker-alt';
+                
+                placesHTML += `
+                    <div class="place-item">
+                        <div class="place-header">
+                            <h4 class="place-title">${place.name}</h4>
+                            <span class="place-distance">${place.distance}</span>
+                        </div>
+                        <div class="place-details">
+                            <div class="place-rating">
+                                ${getRatingStars(place.rating)}
+                                <span>${place.rating}</span>
+                            </div>
+                            <div class="place-category">
+                                <i class="fas ${icon}"></i>
+                                <span>${capitalizeFirstLetter(place.type)}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            placesContainer.innerHTML = placesHTML;
+        } catch (error) {
+            console.error('Error getting nearby places:', error);
+            placesContainer.innerHTML = '<div class="no-places"><p>Unable to load nearby places</p></div>';
+        }
+    }
+    
+    // Function to get directions
+    getDirectionsBtn.addEventListener('click', async function() {
+        const origin = sourceInput.value.trim();
+        const destination = destinationInput.value.trim();
+        
+        if (!origin || !destination) {
+            alert('Please enter both source and destination.');
+            return;
+        }
+        
+        getDirectionsBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+        
+        try {
+            // Get map iframe
+            const mapIframe = await getDirectionsEmbed(origin, destination, API_KEY, '100%', 450);
+            mapContainer.innerHTML = mapIframe;
+            
+            // Get nearby places
+            getNearbyPlaces(destination);
+            
+            getDirectionsBtn.innerHTML = '<i class="fas fa-directions"></i> Get Directions';
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error getting directions. Please try again.');
+            getDirectionsBtn.innerHTML = '<i class="fas fa-directions"></i> Get Directions';
+        }
+    });
+});
+    </script>
+</body>
+</html>

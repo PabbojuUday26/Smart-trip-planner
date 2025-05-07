@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth System</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --accent: #4895ef;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #4cc9f0;
+            --danger: #f72585;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .form-container {
+            padding: 40px;
+        }
+        
+        .form-title {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--dark);
+            font-size: 28px;
+            font-weight: 600;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-group input:focus {
+            border-color: var(--accent);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background-color: var(--primary);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: var(--secondary);
+            transform: translateY(-2px);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .toggle-form {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--dark);
+        }
+        
+        .toggle-form a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        .toggle-form a:hover {
+            text-decoration: underline;
+        }
+        
+        .message {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            text-align: center;
+            display: none;
+        }
+        
+        .error {
+            background-color: #ffebee;
+            color: var(--danger);
+            border: 1px solid #ffcdd2;
+        }
+        
+        .success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Form -->
+        <div id="login-form" class="form-container">
+            <h2 class="form-title">Welcome Back</h2>
+            <div id="login-message" class="message"></div>
+            <form id="login" action="afterhome.html" method="GET">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" required placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" required placeholder="Enter your password">
+                </div>
+                <button type="submit" class="btn">Login</button>
+            </form>
+            <div class="toggle-form">
+                Don't have an account? <a id="show-register">Register</a>
+            </div>
+        </div>
+        
+        <!-- Registration Form -->
+        <div id="register-form" class="form-container" style="display: none;">
+            <h2 class="form-title">Create Account</h2>
+            <div id="register-message" class="message"></div>
+            <form id="register">
+                <div class="form-group">
+                    <label for="register-name">Full Name</label>
+                    <input type="text" id="register-name" required placeholder="Enter your full name">
+                </div>
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" required placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Password</label>
+                    <input type="password" id="register-password" required placeholder="Create a password">
+                </div>
+                <div class="form-group">
+                    <label for="register-confirm-password">Confirm Password</label>
+                    <input type="password" id="register-confirm-password" required placeholder="Confirm your password">
+                </div>
+                <button type="submit" class="btn">Register</button>
+            </form>
+            <div class="toggle-form">
+                Already have an account? <a id="show-login">Login</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const loginForm = document.getElementById('login');
+        const registerForm = document.getElementById('register');
+        const loginFormContainer = document.getElementById('login-form');
+        const registerFormContainer = document.getElementById('register-form');
+        const showRegister = document.getElementById('show-register');
+        const showLogin = document.getElementById('show-login');
+        const loginMessage = document.getElementById('login-message');
+        const registerMessage = document.getElementById('register-message');
+
+        // User data storage (in a real app, this would be a database)
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+
+        // Toggle between login and register forms
+        showRegister.addEventListener('click', () => {
+            loginFormContainer.style.display = 'none';
+            registerFormContainer.style.display = 'block';
+            clearMessages();
+        });
+
+        showLogin.addEventListener('click', () => {
+            registerFormContainer.style.display = 'none';
+            loginFormContainer.style.display = 'block';
+            clearMessages();
+        });
+
+        // Register form submission
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-confirm-password').value;
+            
+            // Validation
+            if (password !== confirmPassword) {
+                showMessage(registerMessage, 'Passwords do not match.', 'error');
+                return;
+            }
+            
+            if (users.some(user => user.email === email)) {
+                showMessage(registerMessage, 'Email already registered.', 'error');
+                return;
+            }
+            
+            // Create new user
+            const newUser = {
+                id: Date.now().toString(),
+                name,
+                email,
+                password
+            };
+            
+            users.push(newUser);
+            localStorage.setItem('users', JSON.stringify(users));
+            
+            // Show success message and switch to login
+            showMessage(registerMessage, 'Registration successful! Please login.', 'success');
+            registerForm.reset();
+            
+            // Auto switch to login after 2 seconds
+            setTimeout(() => {
+                registerFormContainer.style.display = 'none';
+                loginFormContainer.style.display = 'block';
+                clearMessages();
+            }, 2000);
+        });
+
+        // Helper functions
+        function showMessage(element, message, type) {
+            element.textContent = message;
+            element.style.display = 'block';
+            element.className = `message ${type}`;
+        }
+
+        function clearMessages() {
+            loginMessage.style.display = 'none';
+            registerMessage.style.display = 'none';
+        }
+    </script>
+</body>
+</html>

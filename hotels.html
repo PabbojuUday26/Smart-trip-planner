@@ -1,0 +1,2948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Trip | Hotel Booking</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        /* Base Styles with Enhanced Variables */
+        :root {
+            --primary: #6C63FF;
+            --primary-light: #8a84ff;
+            --secondary: #FF6584;
+            --accent: #43C6AC;
+            --accent-dark: #2fa58f;
+            --dark: #2D3748;
+            --dark-light: #4a5568;
+            --light: #F7FAFC;
+            --gradient: linear-gradient(135deg, #6C63FF 0%, #43C6AC 100%);
+            --gradient-hover: linear-gradient(135deg, #5a52e0 0%, #3ab79e 100%);
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+            --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.2);
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            --border-radius: 16px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Header Styles with Sticky Effect */
+        header {
+            background: white;
+            color: var(--dark);
+            padding: 1rem 0;
+            box-shadow: var(--shadow-sm);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            transition: var(--transition);
+        }
+
+        header.scrolled {
+            padding: 0.5rem 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            color: var(--primary);
+        }
+
+        .logo i {
+            margin-right: 0.5rem;
+            font-size: 2rem;
+            transition: var(--transition);
+        }
+
+        .logo:hover i {
+            transform: rotate(-15deg);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-left: 2rem;
+            position: relative;
+        }
+
+        nav ul li a {
+            color: var(--dark);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 0.5rem 0;
+            position: relative;
+        }
+
+        nav ul li a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary);
+            transition: width 0.4s ease;
+        }
+
+        nav ul li a:hover::after {
+            width: 100%;
+        }
+
+        nav ul li a:hover {
+            color: var(--primary);
+        }
+
+        .btn-outline {
+            border: 2px solid var(--primary);
+            background: transparent;
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+        }
+
+        .btn-solid {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+        }
+
+        .btn-solid:hover {
+            background: var(--gradient-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(108, 99, 255, 0.4);
+        }
+
+        /* Hamburger Menu for Mobile */
+        .hamburger {
+            display: none;
+            cursor: pointer;
+            width: 30px;
+            height: 20px;
+            position: relative;
+            z-index: 1001;
+        }
+
+        .hamburger span {
+            display: block;
+            position: absolute;
+            height: 3px;
+            width: 100%;
+            background: var(--primary);
+            border-radius: 3px;
+            opacity: 1;
+            left: 0;
+            transform: rotate(0deg);
+            transition: var(--transition);
+        }
+
+        .hamburger span:nth-child(1) {
+            top: 0;
+        }
+
+        .hamburger span:nth-child(2), .hamburger span:nth-child(3) {
+            top: 10px;
+        }
+
+        .hamburger span:nth-child(4) {
+            top: 20px;
+        }
+
+        .hamburger.open span:nth-child(1) {
+            top: 10px;
+            width: 0%;
+            left: 50%;
+        }
+
+        .hamburger.open span:nth-child(2) {
+            transform: rotate(45deg);
+        }
+
+        .hamburger.open span:nth-child(3) {
+            transform: rotate(-45deg);
+        }
+
+        .hamburger.open span:nth-child(4) {
+            top: 10px;
+            width: 0%;
+            left: 50%;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1400px;
+            margin: 6rem auto;
+            padding: 0 2rem;
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .page-header h1 {
+            font-size: 2.8rem;
+            color: var(--dark);
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            position: relative;
+        }
+
+        .page-header h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 80px;
+            height: 4px;
+            background: var(--gradient);
+            border-radius: 2px;
+        }
+
+        /* Hotel Search Section */
+        .hotel-search-section {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2.5rem;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            animation: fadeIn 0.8s ease-out forwards;
+            opacity: 0;
+        }
+
+        .hotel-search-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--gradient);
+            transition: var(--transition);
+        }
+
+        .hotel-search-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .hotel-search-section:hover::before {
+            height: 8px;
+        }
+
+        .section-title {
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-title i {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+            transition: var(--transition);
+        }
+
+        .section-title:hover i {
+            transform: scale(1.1) rotate(10deg);
+        }
+
+        .section-title h2 {
+            font-size: 1.8rem;
+            color: var(--dark);
+            transition: var(--transition);
+        }
+
+        .section-title:hover h2 {
+            color: var(--primary);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+            transition: var(--transition);
+        }
+
+        .form-group:hover label {
+            color: var(--primary);
+        }
+
+        .form-group input, 
+        .form-group select, 
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus, 
+        .form-group select:focus, 
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.2);
+        }
+
+        .form-group:hover input,
+        .form-group:hover select,
+        .form-group:hover textarea {
+            border-color: var(--primary-light);
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        .plan-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.9rem 2rem;
+            background: var(--gradient);
+            color: white;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .plan-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
+            transform: translateX(-100%);
+            transition: var(--transition);
+        }
+
+        .plan-btn:hover {
+            transform: translateY(-3px);
+            background: var(--gradient-hover);
+            box-shadow: 0 10px 25px rgba(108, 99, 255, 0.4);
+        }
+
+        .plan-btn:hover::after {
+            transform: translateX(100%);
+        }
+
+        .plan-btn i {
+            transition: var(--transition);
+        }
+
+        .plan-btn:hover i {
+            transform: translateX(3px);
+        }
+
+        /* Results Layout */
+        .results-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 992px) {
+            .results-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Hotels List */
+        .hotels-list {
+            height: 500px;
+            overflow-y: auto;
+            padding-right: 1rem;
+        }
+
+        .hotel-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            display: flex;
+            gap: 1.5rem;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .hotel-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .hotel-image {
+            width: 200px;
+            height: 150px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .hotel-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .hotel-card:hover .hotel-image img {
+            transform: scale(1.05);
+        }
+
+        .hotel-rating {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 0.3rem 0.6rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .hotel-rating i {
+            color: #FFC107;
+        }
+
+        .hotel-details {
+            flex: 1;
+        }
+
+        .hotel-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .hotel-title {
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 1.2rem;
+        }
+
+        .hotel-price {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.3rem;
+        }
+
+        .hotel-price small {
+            font-size: 0.9rem;
+            color: var(--dark-light);
+            font-weight: 400;
+        }
+
+        .hotel-location {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--dark-light);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .hotel-location i {
+            color: var(--secondary);
+        }
+
+        .hotel-amenities {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .amenity {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.3rem 0.6rem;
+            background: rgba(108, 99, 255, 0.1);
+            border-radius: 50px;
+            color: var(--primary);
+            font-size: 0.8rem;
+        }
+
+        .amenity i {
+            font-size: 0.9rem;
+        }
+
+        .hotel-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 1rem;
+        }
+
+        /* Booking Summary */
+        .booking-summary {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            height: 500px;
+            overflow-y: auto;
+            transition: var(--transition);
+        }
+
+        .booking-summary:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .booking-summary h3 {
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .selected-hotel {
+            padding: 1rem 0;
+            border-bottom: 1px solid #edf2f7;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .selected-hotel:last-child {
+            border-bottom: none;
+        }
+
+        .selected-hotel-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .selected-hotel-title {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .selected-hotel-price {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+
+        .selected-hotel-dates {
+            font-size: 0.9rem;
+            color: var(--dark-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .booking-details {
+            margin-top: 1.5rem;
+        }
+
+        .booking-detail {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .booking-detail.total {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .booking-actions {
+            margin-top: 1.5rem;
+        }
+
+        /* Booking Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .booking-modal {
+            background: white;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 2rem;
+            transform: translateY(20px);
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .modal-overlay.active .booking-modal {
+            transform: translateY(0);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #f5f5f5;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .modal-header {
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .modal-header h3 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-header p {
+            color: var(--dark-light);
+        }
+
+        .payment-methods {
+            margin: 1.5rem 0;
+        }
+
+        .payment-method {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .payment-method:hover {
+            border-color: var(--primary-light);
+        }
+
+        .payment-method.active {
+            border-color: var(--primary);
+            background: rgba(108, 99, 255, 0.05);
+        }
+
+        .payment-method-icon {
+            width: 40px;
+            height: 40px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.2rem;
+            color: var(--dark);
+        }
+
+        .payment-method-details {
+            flex: 1;
+        }
+
+        .payment-method-title {
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+
+        .payment-method-description {
+            font-size: 0.8rem;
+            color: var(--dark-light);
+        }
+
+        .payment-form {
+            margin-top: 1.5rem;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+            gap: 1rem;
+        }
+
+        /* Confirmation Modal */
+        .confirmation-modal {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .confirmation-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: white;
+            font-size: 2rem;
+            animation: bounceIn 0.6s ease-out;
+        }
+
+        .confirmation-details {
+            margin: 1.5rem 0;
+            text-align: left;
+            background: #f9f9f9;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+        }
+
+        .confirmation-detail {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .confirmation-detail:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .confirmation-detail-label {
+            font-weight: 500;
+            color: var(--dark-light);
+        }
+
+        .confirmation-detail-value {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        /* Additional Content Sections */
+        .info-section {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .info-section h2 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        .info-section h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: var(--gradient);
+        }
+
+        .price-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .price-category {
+            background: #f9f9f9;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .price-category:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .price-category h3 {
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .price-range {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .price-description {
+            color: var(--dark-light);
+            font-size: 0.9rem;
+        }
+
+        .top-hotels {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .top-hotel {
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+
+        .top-hotel:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .top-hotel-image {
+            height: 180px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .top-hotel-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .top-hotel:hover .top-hotel-image img {
+            transform: scale(1.05);
+        }
+
+        .top-hotel-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--secondary);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .top-hotel-details {
+            padding: 1.5rem;
+        }
+
+        .top-hotel-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .top-hotel-title {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .top-hotel-price {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .top-hotel-location {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--dark-light);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .top-hotel-location i {
+            color: var(--secondary);
+        }
+
+        .top-hotel-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            color: #FFC107;
+            font-size: 0.9rem;
+        }
+
+        .tips-section {
+            background: var(--light);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .tip-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+
+        .tip-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .tip-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(108, 99, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .tip-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .tip-content {
+            color: var(--dark-light);
+            font-size: 0.9rem;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.2); opacity: 1; }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .page-header h1 {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1.5rem;
+            }
+            
+            .hotel-card {
+                flex-direction: column;
+            }
+            
+            .hotel-image {
+                width: 100%;
+                height: 200px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hamburger {
+                display: block;
+            }
+            
+            nav {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 80%;
+                max-width: 350px;
+                height: 100vh;
+                background: white;
+                box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
+                transition: var(--transition);
+                z-index: 1000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            nav.active {
+                right: 0;
+            }
+            
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+                padding: 2rem;
+                width: 100%;
+            }
+            
+            nav ul li {
+                margin: 1rem 0;
+            }
+            
+            nav ul li a {
+                color: var(--dark);
+                font-size: 1.2rem;
+            }
+            
+            .header-content {
+                padding: 1rem;
+            }
+            
+            .main-content {
+                margin-top: 5rem;
+            }
+            
+            .page-header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .hotel-search-section {
+                padding: 1.5rem;
+            }
+            
+            .section-title h2 {
+                font-size: 1.5rem;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .page-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .hotel-search-section {
+                padding: 1.5rem 1rem;
+            }
+            
+            .modal-actions {
+                flex-direction: column;
+            }
+            
+            .modal-actions .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header id="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-plane"></i>
+                <span>Smart Trip</span>
+            </div>
+            <nav id="nav">
+                <ul>
+                    <li><a href="afterhome.html">Home</a></li>
+                    <li><a href="#">Destinations</a></li>
+                    <li><a href="#Hotels">Hotels</a></li>
+                    <li><a href="expenseplan.html">Expenses Planner</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </nav>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1>Hotel Booking</h1>
+        </div>
+
+        <!-- Hotel Search Section -->
+        <section class="hotel-search-section">
+            <div class="section-title">
+                <i class="fas fa-hotel"></i>
+                <h2>Find Your Perfect Stay</h2>
+            </div>
+            <p>Search for hotels in your destination and book your stay with ease. We partner with over 500,000 hotels worldwide to bring you the best options at competitive prices.</p>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="destination">Destination</label>
+                    <input type="text" id="destination" placeholder="City, region, or hotel name">
+                </div>
+                <div class="form-group">
+                    <label for="check-in">Check-in Date</label>
+                    <input type="date" id="check-in">
+                </div>
+                <div class="form-group">
+                    <label for="check-out">Check-out Date</label>
+                    <input type="date" id="check-out">
+                </div>
+                <div class="form-group">
+                    <label for="guests">Guests</label>
+                    <select id="guests">
+                        <option value="1">1 Guest</option>
+                        <option value="2" selected>2 Guests</option>
+                        <option value="3">3 Guests</option>
+                        <option value="4">4 Guests</option>
+                        <option value="5">5+ Guests</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button class="plan-btn" id="search-hotels">
+                    <i class="fas fa-search"></i> Search Hotels
+                </button>
+            </div>
+            
+            <div class="results-container">
+                <div class="hotels-list" id="hotels-list">
+                    <div class="no-hotels">
+                        <p>Search for hotels to see available options</p>
+                    </div>
+                </div>
+                
+                <div class="booking-summary" id="booking-summary">
+                    <h3><i class="fas fa-receipt"></i> Booking Summary</h3>
+                    <div class="no-selection">
+                        <p>Select a hotel to see booking details</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Hotel Price Categories -->
+        <section class="info-section">
+            <h2>Hotel Price Categories</h2>
+            <p>Understand different hotel categories and what to expect at each price point to find the perfect accommodation for your budget.</p>
+            
+            <div class="price-categories">
+                <div class="price-category">
+                    <h3>Budget Hotels</h3>
+                    <div class="price-range">₹800 - ₹2,500 per night</div>
+                    <div class="price-description">
+                        Basic accommodations with clean rooms and essential amenities. Ideal for travelers who prioritize savings over luxury.
+                    </div>
+                </div>
+                
+                <div class="price-category">
+                    <h3>Mid-Range Hotels</h3>
+                    <div class="price-range">₹2,500 - ₹6,000 per night</div>
+                    <div class="price-description">
+                        Comfortable accommodations with additional amenities like swimming pools, restaurants, and fitness centers.
+                    </div>
+                </div>
+                
+                <div class="price-category">
+                    <h3>Luxury Hotels</h3>
+                    <div class="price-range">₹6,000 - ₹20,000+ per night</div>
+                    <div class="price-description">
+                        Premium accommodations with exceptional service, gourmet dining, spa facilities, and often prime locations.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Top Hotels in India -->
+        <section class="info-section">
+            <h2>Top Rated Hotels in India</h2>
+            <p>Discover our curated selection of exceptional hotels that consistently receive outstanding reviews from travelers.</p>
+            
+            <div class="top-hotels">
+                <div class="top-hotel">
+                    <div class="top-hotel-image">
+                        <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="The Oberoi">
+                        <div class="top-hotel-badge">Top Rated</div>
+                    </div>
+                    <div class="top-hotel-details">
+                        <div class="top-hotel-header">
+                            <div class="top-hotel-title">The Oberoi, New Delhi</div>
+                            <div class="top-hotel-price">₹15,000+</div>
+                        </div>
+                        <div class="top-hotel-location">
+                            <i class="fas fa-map-marker-alt"></i> New Delhi, India
+                        </div>
+                        <div class="top-hotel-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <span>4.9 (1,245 reviews)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="top-hotel">
+                    <div class="top-hotel-image">
+                        <img src="https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Taj Lake Palace">
+                        <div class="top-hotel-badge">Luxury</div>
+                    </div>
+                    <div class="top-hotel-details">
+                        <div class="top-hotel-header">
+                            <div class="top-hotel-title">Taj Lake Palace, Udaipur</div>
+                            <div class="top-hotel-price">₹25,000+</div>
+                        </div>
+                        <div class="top-hotel-location">
+                            <i class="fas fa-map-marker-alt"></i> Udaipur, India
+                        </div>
+                        <div class="top-hotel-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <span>4.8 (980 reviews)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="top-hotel">
+                    <div class="top-hotel-image">
+                        <img src="https://images.unsplash.com/photo-1596178065887-1198b6148b2b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="ITC Grand Chola">
+                        <div class="top-hotel-badge">Business</div>
+                    </div>
+                    <div class="top-hotel-details">
+                        <div class="top-hotel-header">
+                            <div class="top-hotel-title">ITC Grand Chola, Chennai</div>
+                            <div class="top-hotel-price">₹12,000+</div>
+                        </div>
+                        <div class="top-hotel-location">
+                            <i class="fas fa-map-marker-alt"></i> Chennai, India
+                        </div>
+                        <div class="top-hotel-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <span>4.7 (1,120 reviews)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Hotel Booking Tips -->
+        <section class="tips-section">
+            <h2>Smart Hotel Booking Tips</h2>
+            <p>Maximize your travel experience with these expert tips for booking hotels.</p>
+            
+            <div class="tips-grid">
+                <div class="tip-card">
+                    <div class="tip-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <h3 class="tip-title">Book in Advance</h3>
+                    <p class="tip-content">Reserve your room 2-3 months early for popular destinations to secure better rates and availability.</p>
+                </div>
+                
+                <div class="tip-card">
+                    <div class="tip-icon">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <h3 class="tip-title">Look for Discounts</h3>
+                    <p class="tip-content">Check for seasonal promotions, last-minute deals, or loyalty program discounts before booking.</p>
+                </div>
+                
+                <div class="tip-card">
+                    <div class="tip-icon">
+                        <i class="fas fa-map-marked-alt"></i>
+                    </div>
+                    <h3 class="tip-title">Consider Location</h3>
+                    <p class="tip-content">Balance price with convenience - sometimes paying slightly more for a central location saves on transportation.</p>
+                </div>
+                
+                <div class="tip-card">
+                    <div class="tip-icon">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <h3 class="tip-title">Check Amenities</h3>
+                    <p class="tip-content">Verify included amenities like breakfast, WiFi, or parking which can significantly affect your total trip cost.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Booking Modal -->
+    <div class="modal-overlay" id="booking-modal">
+        <div class="booking-modal">
+            <div class="modal-close" id="modal-close">
+                <i class="fas fa-times"></i>
+            </div>
+            <div class="modal-header">
+                <h3>Complete Your Booking</h3>
+                <p>Enter your payment details to confirm your reservation</p>
+            </div>
+            
+            <div class="selected-hotel">
+                <div class="selected-hotel-header">
+                    <div class="selected-hotel-title" id="modal-hotel-name">Grand Hotel</div>
+                    <div class="selected-hotel-price" id="modal-hotel-price">₹8,500</div>
+                </div>
+                <div class="selected-hotel-dates" id="modal-hotel-dates">Nov 15 - Nov 18, 2023 (3 nights)</div>
+            </div>
+            
+            <div class="guest-info">
+                <h4><i class="fas fa-user"></i> Guest Information</h4>
+                <div class="form-group">
+                    <label for="full-name">Full Name</label>
+                    <input type="text" id="full-name" placeholder="Enter your full name">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" placeholder="Enter your phone number">
+                </div>
+            </div>
+            
+            <div class="payment-methods">
+                <h4><i class="fas fa-credit-card"></i> Payment Method</h4>
+                <div class="payment-method active">
+                    <div class="payment-method-icon">
+                        <i class="far fa-credit-card"></i>
+                    </div>
+                    <div class="payment-method-details">
+                        <div class="payment-method-title">Credit/Debit Card</div>
+                        <div class="payment-method-description">Pay with Visa, Mastercard, or other cards</div>
+                    </div>
+                </div>
+                <div class="payment-method">
+                    <div class="payment-method-icon">
+                        <i class="fab fa-paypal"></i>
+                    </div>
+                    <div class="payment-method-details">
+                        <div class="payment-method-title">PayPal</div>
+                        <div class="payment-method-description">Pay with your PayPal account</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="payment-form">
+                <div class="form-group">
+                    <label for="card-number">Card Number</label>
+                    <input type="text" id="card-number" placeholder="1234 5678 9012 3456">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="expiry-date">Expiry Date</label>
+                        <input type="text" id="expiry-date" placeholder="MM/YY">
+                    </div>
+                    <div class="form-group">
+                        <label for="cvv">CVV</label>
+                        <input type="text" id="cvv" placeholder="123">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="card-name">Name on Card</label>
+                    <input type="text" id="card-name" placeholder="Enter name as on card">
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn-outline" id="cancel-booking">Cancel</button>
+                <button class="btn-solid" id="confirm-booking">
+                    <i class="fas fa-lock"></i> Confirm Booking
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" id="confirmation-modal">
+        <div class="booking-modal confirmation-modal">
+            <div class="confirmation-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            <h3>Booking Confirmed!</h3>
+            <p>Your reservation has been successfully completed. A confirmation has been sent to your email.</p>
+            
+            <div class="confirmation-details">
+                <div class="confirmation-detail">
+                    <span class="confirmation-detail-label">Booking Reference:</span>
+                    <span class="confirmation-detail-value">SMTRP-2023-5874</span>
+                </div>
+                <div class="confirmation-detail">
+                    <span class="confirmation-detail-label">Hotel:</span>
+                    <span class="confirmation-detail-value" id="confirmation-hotel">Grand Hotel</span>
+                </div>
+                <div class="confirmation-detail">
+                    <span class="confirmation-detail-label">Dates:</span>
+                    <span class="confirmation-detail-value" id="confirmation-dates">Nov 15 - Nov 18, 2023 (3 nights)</span>
+                </div>
+                <div class="confirmation-detail">
+                    <span class="confirmation-detail-label">Guests:</span>
+                    <span class="confirmation-detail-value" id="confirmation-guests">2</span>
+                </div>
+                <div class="confirmation-detail">
+                    <span class="confirmation-detail-label">Total Paid:</span>
+                    <span class="confirmation-detail-value" id="confirmation-total">₹25,500</span>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn-solid" id="done-button">
+                    <i class="fas fa-check"></i> Done
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile Menu Toggle
+            const hamburger = document.getElementById('hamburger');
+            const nav = document.getElementById('nav');
+            
+            hamburger.addEventListener('click', function() {
+                this.classList.toggle('open');
+                nav.classList.toggle('active');
+            });
+            
+            // Close mobile menu when clicking on a link
+            document.querySelectorAll('nav ul li a').forEach(link => {
+                link.addEventListener('click', () => {
+                    hamburger.classList.remove('open');
+                    nav.classList.remove('active');
+                });
+            });
+            
+            // Sticky Header
+            const header = document.getElementById('header');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+
+            // Hotel Search Functionality
+            const searchHotelsBtn = document.getElementById('search-hotels');
+            const hotelsList = document.getElementById('hotels-list');
+            const bookingSummary = document.getElementById('booking-summary');
+            const bookingModal = document.getElementById('booking-modal');
+            const confirmationModal = document.getElementById('confirmation-modal');
+            const modalClose = document.getElementById('modal-close');
+            const cancelBookingBtn = document.getElementById('cancel-booking');
+            const confirmBookingBtn = document.getElementById('confirm-booking');
+            const doneButton = document.getElementById('done-button');
+            
+            // Sample hotel data
+            const sampleHotels = [
+                {
+                    id: 1,
+                    name: "Grand Hotel",
+                    location: "Bangalore, India",
+                    rating: 4.5,
+                    price: 8500,
+                    image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+                    amenities: ["Free WiFi", "Pool", "Spa", "Restaurant", "Gym"],
+                    description: "Luxury accommodations with spa and rooftop pool in the heart of the city."
+                },
+                {
+                    id: 2,
+                    name: "Seaside Resort",
+                    location: "Goa, India",
+                    rating: 4.2,
+                    price: 12000,
+                    image: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+                    amenities: ["Beach Access", "Free WiFi", "Pool", "Breakfast Included"],
+                    description: "Beachfront resort with private beach access and stunning ocean views."
+                },
+                {
+                    id: 3,
+                    name: "Mountain View Lodge",
+                    location: "Shimla, India",
+                    rating: 4.7,
+                    price: 6500,
+                    image: "https://images.unsplash.com/photo-1596178065887-1198b6148b2b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+                    amenities: ["Mountain View", "Free WiFi", "Restaurant", "Fireplace"],
+                    description: "Cozy lodge with panoramic mountain views and rustic charm."
+                },
+                {
+                    id: 4,
+                    name: "Urban Suites",
+                    location: "Mumbai, India",
+                    rating: 4.0,
+                    price: 7500,
+                    image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+                    amenities: ["Free WiFi", "Business Center", "Gym", "24/7 Room Service"],
+                    description: "Modern suites in the business district with all amenities for the urban traveler."
+                },
+                {
+                    id: 5,
+                    name: "Heritage Palace Hotel",
+                    location: "Jaipur, India",
+                    rating: 4.8,
+                    price: 9500,
+                    image: "https://images.unsplash.com/photo-1535827841776-24afc1e255ac?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1475&q=80",
+                    amenities: ["Historic Building", "Pool", "Spa", "Fine Dining"],
+                    description: "Experience royal luxury in this beautifully restored heritage palace."
+                },
+                {
+                        id: 6,
+                        name: "Taj Lake Palace",
+                        location: "Udaipur, India",
+                        rating: 4.9,
+                        price: 25000,
+                        image: "https://images.unsplash.com/photo-1583423230902-754c3bf1b8d3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+                        amenities: ["Lake View", "Luxury Spa", "Fine Dining", "Boat Transfer", "Butler Service"],
+                        description: "Iconic white marble palace floating on Lake Pichola with royal suites and unmatched luxury."
+                    },
+                    {
+                        id: 7,
+                        name: "Kumarakom Lake Resort",
+                        location: "Kerala, India",
+                        rating: 4.6,
+                        price: 18000,
+                        image: "https://images.unsplash.com/photo-1564501049412-61c2a3083791?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1632&q=80",
+                        amenities: ["Backwater View", "Ayurvedic Spa", "Houseboat Cruises", "Yoga Classes", "Organic Restaurant"],
+                        description: "Serene backwater resort with traditional Keralite architecture and authentic experiences."
+                    },
+                    {
+                        id: 8,
+                        name: "The Oberoi Amarvilas",
+                        location: "Agra, India",
+                        rating: 4.8,
+                        price: 35000,
+                        image: "https://images.unsplash.com/photo-1587135991058-8816a5a6e0c1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80",
+                        amenities: ["Taj Mahal View", "Private Pool Villas", "24/7 Butler", "Luxury Spa", "Fine Dining"],
+                        description: "Every room offers uninterrupted views of the Taj Mahal with Mughal-inspired luxury."
+                    },
+                    {
+                        id: 9,
+                        name: "Wildflower Hall",
+                        location: "Shimla, India",
+                        rating: 4.7,
+                        price: 22000,
+                        image: "https://images.unsplash.com/photo-1596178065887-1198b6148b2b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+                        amenities: ["Mountain View", "Heated Pool", "Adventure Activities", "Library", "Luxury Spa"],
+                        description: "Former residence of Lord Kitchener, now a luxury mountain retreat with panoramic views."
+                    },
+                    {
+                        id: 10,
+                        name: "Taj Falaknuma Palace",
+                        location: "Hyderabad, India",
+                        rating: 4.9,
+                        price: 30000,
+                        image: "https://images.unsplash.com/photo-1590661337986-8aed0b5e3244?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+                        amenities: ["Palace Tour", "Horse Carriage Ride", "Vintage Library", "Royal Dining", "Spa"],
+                        description: "19th-century palace offering Nizami grandeur with hand-painted ceilings and antique furniture."
+                    },
+                    {
+                        id: 11,
+                        name: "The Leela Palace",
+                        location: "Chennai, India",
+                        rating: 4.5,
+                        price: 15000,
+                        image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+                        amenities: ["Beach Access", "Infinity Pool", "Multiple Restaurants", "Kids Club", "Spa"],
+                        description: "Luxury beachfront property blending traditional South Indian architecture with modern comforts."
+                    },
+                    {
+                        id: 12,
+                        name: "Tree of Life Resort",
+                        location: "Jaipur, India",
+                        rating: 4.3,
+                        price: 12000,
+                        image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+                        amenities: ["Eco-friendly", "Organic Farm", "Village Tours", "Yoga", "Outdoor Pool"],
+                        description: "Sustainable luxury resort spread across 7 acres with private pool villas and organic dining."
+                    },
+                    {
+                        id: 13,
+                        name: "The Tamara Coorg",
+                        location: "Coorg, India",
+                        rating: 4.6,
+                        price: 18000,
+                        image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+                        amenities: ["Coffee Estate", "Trekking", "Infinity Pool", "Spa", "Bird Watching"],
+                        description: "Luxury eco-resort nestled in coffee plantations with panoramic valley views."
+                    },
+                    {
+                        id: 14,
+                        name: "Taj Fort Aguada Resort",
+                        location: "Goa, India",
+                        rating: 4.4,
+                        price: 16000,
+                        image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+                        amenities: ["Private Beach", "Water Sports", "Goan Cuisine", "Spa", "Heritage Walk"],
+                        description: "17th-century Portuguese fort converted into a luxury beach resort with colonial charm."
+                    },
+                    {
+                        id: 15,
+                        name: "The Khyber Himalayan Resort",
+                        location: "Gulmarg, India",
+                        rating: 4.7,
+                        price: 20000,
+                        image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+                        amenities: ["Ski-in/Ski-out", "Hot Stone Spa", "Gondola Access", "Fine Dining", "Mountain View"],
+                        description: "Luxury alpine resort with direct access to Asia's highest gondola and ski slopes."
+                    },
+                        {
+                            id: 16,
+                            name: "Evolve Back, Kabini",
+                            location: "Kabini, Karnataka, India",
+                            rating: 4.8,
+                            price: 23000,
+                            image: "https://images.unsplash.com/photo-1560347876-aeef00ee58a1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                            amenities: ["Jungle Safari", "Infinity Pool", "Tribal Cuisine", "Nature Walks", "Eco-Friendly"],
+                            description: "Luxury resort on the banks of Kabini River, offering wildlife experiences in a tribal setting."
+                        },
+                        {
+                            id: 17,
+                            name: "Ananda in the Himalayas",
+                            location: "Rishikesh, India",
+                            rating: 4.9,
+                            price: 32000,
+                            image: "https://images.unsplash.com/photo-1590490360182-37943f13ccf2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                            amenities: ["Ayurveda", "Yoga Retreat", "Meditation Pavilion", "Spa Cuisine", "Mountain View"],
+                            description: "Internationally renowned wellness retreat located in the Himalayan foothills, blending luxury and spirituality."
+                        },
+                        {
+                            id: 18,
+                            name: "Suryagarh",
+                            location: "Jaisalmer, India",
+                            rating: 4.7,
+                            price: 19000,
+                            image: "https://images.unsplash.com/photo-1582921015304-778dfc4a4df3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                            amenities: ["Desert Safari", "Folk Music Nights", "Spa", "Cultural Walks", "Heritage Decor"],
+                            description: "A fortress-style desert hotel offering a royal Rajasthani experience with heritage luxury."
+                        },
+                        {
+                            id: 19,
+                            name: "JW Marriott Mussoorie Walnut Grove Resort",
+                            location: "Mussoorie, India",
+                            rating: 4.6,
+                            price: 17000,
+                            image: "https://images.unsplash.com/photo-1559511260-3b208e47c2d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                            amenities: ["Hill View", "Indoor Pool", "Kids Zone", "Organic Dining", "Adventure Activities"],
+                            description: "Family-friendly luxury resort nestled in the Garhwal hills, offering panoramic valley views and serene vibes."
+                        },
+                        {
+                            id: 20,
+                            name: "Neemrana Fort Palace",
+                            location: "Alwar, Rajasthan, India",
+                            rating: 4.3,
+                            price: 11000,
+                            image: "https://images.unsplash.com/photo-1559579313-3383cd7c6f99?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                            amenities: ["Historical Fort", "Cultural Events", "Multi-tier Pools", "Vintage Rooms", "Zip Lining"],
+                            description: "Restored 15th-century fort turned heritage hotel with panoramic views and historic charm."
+                        },
+                        
+                            {
+                                id: 21,
+                                name: "Umaid Bhawan Palace",
+                                location: "Jodhpur, Rajasthan, India",
+                                rating: 4.9,
+                                price: 35000,
+                                image: "https://images.unsplash.com/photo-1582921015304-778dfc4a4df3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                                amenities: ["Heritage Suites", "Museum", "Royal Dining", "Indoor Pool", "Spa"],
+                                description: "A majestic palace hotel offering a blend of heritage and luxury, set amidst lush gardens."
+                            },
+                            {
+                                id: 22,
+                                name: "The Oberoi Udaivilas",
+                                location: "Udaipur, Rajasthan, India",
+                                rating: 4.8,
+                                price: 30000,
+                                image: "https://images.unsplash.com/photo-1582921015304-778dfc4a4df3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                                amenities: ["Lake View", "Private Pools", "Fine Dining", "Spa", "Boat Rides"],
+                                description: "A luxurious resort on the banks of Lake Pichola, known for its grand architecture and serene ambiance."
+                            },
+                            {
+                                id: 23,
+                                name: "Ananda in the Himalayas",
+                                location: "Rishikesh, Uttarakhand, India",
+                                rating: 4.9,
+                                price: 32000,
+                                image: "https://images.unsplash.com/photo-1590490360182-37943f13ccf2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                                amenities: ["Ayurveda", "Yoga Retreat", "Meditation Pavilion", "Spa Cuisine", "Mountain View"],
+                                description: "A renowned wellness retreat offering holistic therapies amidst the tranquil Himalayan foothills."
+                            },
+                            {
+                                id: 24,
+                                name: "The Leela Palace New Delhi",
+                                location: "New Delhi, India",
+                                rating: 4.7,
+                                price: 28000,
+                                image: "https://images.unsplash.com/photo-1590490360182-37943f13ccf2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                                amenities: ["City View", "Rooftop Pool", "Multiple Restaurants", "Spa", "Butler Service"],
+                                description: "An opulent hotel in the heart of Delhi, combining traditional Indian architecture with modern luxury."
+                            },
+                            {
+                                id: 25,
+                                name: "Taj Mahal Palace",
+                                location: "Mumbai, Maharashtra, India",
+                                rating: 4.8,
+                                price: 29000,
+                                image: "https://images.unsplash.com/photo-1590490360182-37943f13ccf2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                                amenities: ["Sea View", "Heritage Rooms", "Fine Dining", "Spa", "Art Gallery"],
+                                description: "An iconic hotel overlooking the Arabian Sea, known for its rich history and luxurious accommodations."
+
+                            },
+                                {
+                                    id: 26,
+                                    name: "Raffles Jaipur",
+                                    location: "Jaipur, Rajasthan, India",
+                                    rating: 4.9,
+                                    price: 40000,
+                                    image: "https://images.unsplash.com/photo-1582921015304-778dfc4a4df3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                                    amenities: ["Royal Suites", "Fine Dining", "Spa", "Butler Service", "Heritage Architecture"],
+                                    description: "A modern-day palace offering authentic Rajasthani royal experiences with personalized hospitality."
+                                },
+                                {
+                                    id: 27,
+                                    name: "Six Senses Fort Barwara",
+                                    location: "Sawai Madhopur, Rajasthan, India",
+                                    rating: 4.8,
+                                    price: 45000,
+                                    image: "https://images.unsplash.com/photo-1590490360182-37943f13ccf2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                                    amenities: ["Wellness Spa", "Yoga Pavilion", "Heritage Suites", "Organic Dining", "Aravalli Views"],
+                                    description: "A restored 14th-century fort offering eco-luxury experiences with a focus on wellness and sustainability."
+                                },
+                                {
+                                    id: 28,
+                                    name: "Evolve Back Hampi",
+                                    location: "Hampi, Karnataka, India",
+                                    rating: 4.7,
+                                    price: 38000,
+                                    image: "https://images.unsplash.com/photo-1582921015304-778dfc4a4df3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                                    amenities: ["Palatial Suites", "Infinity Pool", "Heritage Tours", "Spa", "Fine Dining"],
+                                    description: "Architectural magnificence echoing the glory of the Vijayanagara Empire, offering luxurious experiences."
+                                },
+                                {
+                                    id: 29,
+                                    name: "The Serai, Bandipur",
+                                    location: "Bandipur, Karnataka, India",
+                                    rating: 4.6,
+                                    price: 25000,
+                                    image: "https://images.unsplash.com/photo-1590490360182-37943f13ccf2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                                    amenities: ["Wildlife Safaris", "Luxury Villas", "Spa", "Nature Trails", "Multi-cuisine Restaurant"],
+                                    description: "Immerse yourself in the wilderness without compromising on luxury at this resort bordering Bandipur National Park."
+                                },
+                                {
+                                    id: 30,
+                                    name: "The Lalit Resort & Spa Bekal",
+                                    location: "Bekal, Kerala, India",
+                                    rating: 4.5,
+                                    price: 22000,
+                                    image: "https://images.unsplash.com/photo-1582921015304-778dfc4a4df3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                                    amenities: ["Lagoon View Rooms", "Kaya Kalp Spa", "Private Beach", "Yoga Sessions", "Fine Dining"],
+                                    description: "A haven of tranquility tucked away in Kerala’s coast, offering peace and wellness amidst serene beauty."
+                                },
+                                {
+                                    id: 31,
+                                    name: "Tilar Siro Andamans",
+                                    location: "Havelock Island, Andaman and Nicobar Islands, India",
+                                    rating: 4.7,
+                                    price: 23500,
+                                    image: "https://images.unsplash.com/photo-1590490360182-37943f13ccf2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                                    amenities: ["Beachfront Villas", "Scuba Diving", "Spa", "Seafood Dining", "Snorkeling"],
+                                    description: "Experience the pristine white sandy beaches and blue sea at this luxurious resort on Havelock Island."
+                                },
+                                {
+                                    id: 32,
+                                    name: "Aahana The Corbett Wilderness",
+                                    location: "Ramnagar, Uttarakhand, India",
+                                    rating: 4.6,
+                                    price: 21000,
+                                    image: "https://images.unsplash.com/photo-1582921015304-778dfc4a4df3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                                    amenities: ["Wildlife Safaris", "Eco-friendly Cottages", "Spa", "Organic Farming", "Nature Walks"],
+                                    description: "An award-winning wildlife resort offering luxury amidst the wilderness of Corbett National Park."
+                                },
+                                {
+                                    id: 33,
+                                    name: "The Belgadia Palace",
+                                    location: "Baripada, Odisha, India",
+                                    rating: 4.4,
+                                    price: 18000,
+                                    image: "https://images.unsplash.com/photo-1590490360182-37943f13ccf2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                                    amenities: ["Heritage Suites", "Cultural Performances", "Museum", "Spa", "Art Workshops"],
+                                    description: "A 200-year-old palace transformed into a boutique hotel, showcasing Odisha’s rich history and culture."
+                                },
+                                {
+                                    id: 34,
+                                    name: "SUJÁN The Serai",
+                                    location: "Jaisalmer, Rajasthan, India",
+                                    rating: 4.8,
+                                    price: 50000,
+                                    image: "https://images.unsplash.com/photo-1582921015304-778dfc4a4df3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                                    amenities: ["Luxury Tented Suites", "Private Pools", "Desert Safaris", "Spa", "Cultural Experiences"],
+                                    description: "Reminiscent of royal caravans, this boutique hotel offers luxury amidst a 100-acre private estate in the desert."
+                                },
+                                {
+                                    id: 35,
+                                    name: "Alila Fort Bishangarh",
+                                    location: "Bishangarh, Rajasthan, India",
+                                    rating: 4.7,
+                                    price: 40000,
+                                    image: "https://images.unsplash.com/photo-1590490360182-37943f13ccf2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                                    amenities: ["Heritage Suites", "Spa", "Fine Dining", "Adventure Activities", "Aravalli Views"],
+                                    description: "A serene retreat overlooking the Aravalli Hills, offering luxury within a restored royal fortress."
+                                },
+                                
+                                    {
+                                        id: 36,
+                                        name: "The Oberoi Grand",
+                                        location: "Kolkata, West Bengal, India",
+                                        rating: 4.7,
+                                        price: 18000,
+                                        image: "https://images.unsplash.com/photo-1582921015304-778dfc4a4df3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                                        amenities: ["Colonial Architecture", "Fine Dining", "Spa", "Fitness Center", "Outdoor Pool"],
+                                        description: "A heritage hotel in the heart of Kolkata, blending classical architecture with modern comforts."
+                                    },
+                                    {
+                                        id: 37,
+                                        name: "The Lalit Resort & Spa Bekal",
+                                        location: "Bekal, Kerala, India",
+                                        rating: 4.6,
+                                        price: 20000,
+                                        image: "https://images.unsplash.com/photo-1590490360182-37943f13ccf2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                                        amenities: ["Private Beach", "Ayurvedic Spa", "Backwater Cruises", "Yoga Sessions", "Outdoor Pool"],
+                                        description: "A serene resort nestled in the lap of nature, offering a perfect blend of luxury and tranquility."
+                                    },
+                                    {
+                                        id: 38,
+                                        name: "The Imperial",
+                                        location: "New Delhi, India",
+                                        rating: 4.8,
+                                        price: 25000,
+                                        image: "https://images.unsplash.com/photo-1582921015304-778dfc4a4df3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                                        amenities: ["Heritage Property", "Fine Dining", "Art Gallery", "Spa", "Fitness Center"],
+                                        description: "An iconic hotel that reflects the colonial elegance of the British era, located in the heart of Delhi."
+                                    },
+                                    {
+                                        id: 39,
+                                        name: "Vivanta Dal View",
+                                        location: "Srinagar, Jammu & Kashmir, India",
+                                        rating: 4.5,
+                                        price: 22000,
+                                        image: "https://images.unsplash.com/photo-1590490360182-37943f13ccf2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                                        amenities: ["Lake View", "Heated Pool", "Kashmiri Cuisine", "Spa", "Garden"],
+                                        description: "Overlooking the picturesque Dal Lake, this hotel offers a luxurious stay amidst the mountains."
+                                    },
+                                    {
+                                        id: 40,
+                                        name: "Mayfair Spa Resort & Casino",
+                                        location: "Gangtok, Sikkim, India",
+                                        rating: 4.6,
+                                        price: 21000,
+                                        image: "https://images.unsplash.com/photo-1582921015304-778dfc4a4df3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                                        amenities: ["Casino", "Spa", "Indoor Pool", "Multi-cuisine Restaurant", "Fitness Center"],
+                                        description: "A blend of luxury and entertainment, this resort offers a unique experience in the hills of Sikkim."
+                                    },                      
+                                        {
+                                            id: 41,
+                                            name: "Mumbai Grand Hotel",
+                                            location: "Mumbai, India",
+                                            rating: 4.0,
+                                            price: 5000,
+                                            image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                            amenities: ["Free Wi-Fi", "Breakfast", "Parking", "Air Conditioning", "Room Service"],
+                                            description: "A comfortable and luxurious stay in Mumbai, offering all modern amenities and excellent service."
+                                        },
+                                        {
+                                                id: 36,
+                                                name: "ITC Grand Chola",
+                                                location: "Chennai, Tamil Nadu, India",
+                                                rating: 4.8,
+                                                price: 22000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Luxury Spa", "Multiple Dining Options", "Business Center", "Pool", "Fitness Center"],
+                                                description: "A magnificent architectural marvel inspired by the grandeur of the Chola dynasty."
+                                            },
+                                            {
+                                                id: 37,
+                                                name: "The Westin Hyderabad Mindspace",
+                                                location: "Hyderabad, Telangana, India",
+                                                rating: 4.6,
+                                                price: 15000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Heavenly Bed", "SuperFoodsRx", "Pool", "Spa", "24/7 Fitness"],
+                                                description: "Contemporary luxury with wellness-focused amenities in Hyderabad's tech corridor."
+                                            },
+                                            {
+                                                id: 38,
+                                                name: "Taj Exotica Resort & Spa",
+                                                location: "Benaulim, Goa, India",
+                                                rating: 4.7,
+                                                price: 24000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Private Beach", "Goan-Portuguese Architecture", "Spa", "Water Sports", "Culinary Classes"],
+                                                description: "Beachfront luxury resort blending contemporary design with Goan heritage."
+                                            },
+                                            {
+                                                id: 39,
+                                                name: "The Park Chennai",
+                                                location: "Chennai, Tamil Nadu, India",
+                                                rating: 4.3,
+                                                price: 9000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Rooftop Pool", "Art Collection", "Nightclub", "Spa", "Multiple Dining Options"],
+                                                description: "Chic urban hotel with contemporary design and vibrant nightlife options."
+                                            },
+                                            {
+                                                id: 40,
+                                                name: "Radisson Blu Plaza Delhi Airport",
+                                                location: "New Delhi, India",
+                                                rating: 4.4,
+                                                price: 12000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Airport Shuttle", "24/7 Dining", "Pool", "Spa", "Business Center"],
+                                                description: "Convenient luxury near the airport with excellent business facilities."
+                                            },
+                                            {
+                                                id: 41,
+                                                name: "The Gateway Resort Damdama Lake",
+                                                location: "Gurugram, Haryana, India",
+                                                rating: 4.2,
+                                                price: 8000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Lake View", "Adventure Activities", "Nature Walks", "Pool", "Organic Farming"],
+                                                description: "Eco-friendly resort offering a peaceful retreat near Delhi NCR."
+                                            },
+                                            {
+                                                id: 42,
+                                                name: "Hyatt Regency Pune",
+                                                location: "Pune, Maharashtra, India",
+                                                rating: 4.5,
+                                                price: 13000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Regency Club", "Spa", "Multiple Dining Options", "Pool", "Business Facilities"],
+                                                description: "Contemporary hotel in Pune's business district with excellent meeting spaces."
+                                            },
+                                            {
+                                                id: 43,
+                                                name: "The Zuri Kumarakom",
+                                                location: "Kumarakom, Kerala, India",
+                                                rating: 4.6,
+                                                price: 18000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Backwater Views", "Ayurvedic Spa", "Houseboat Cruises", "Yoga", "Cultural Performances"],
+                                                description: "Luxury resort on Vembanad Lake offering authentic Kerala experiences."
+                                            },
+                                            {
+                                                id: 44,
+                                                name: "Novotel Visakhapatnam Varun Beach",
+                                                location: "Visakhapatnam, Andhra Pradesh, India",
+                                                rating: 4.3,
+                                                price: 11000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Beach Access", "Pool", "Kids Club", "Spa", "Multiple Dining Options"],
+                                                description: "Modern beachfront property with panoramic views of the Bay of Bengal."
+                                            },
+                                            {
+                                                id: 45,
+                                                name: "The Fern Residency Ludhiana",
+                                                location: "Ludhiana, Punjab, India",
+                                                rating: 4.1,
+                                                price: 7000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Eco-friendly", "Fitness Center", "Multi-cuisine Restaurant", "Conference Facilities", "24/7 Room Service"],
+                                                description: "Sustainable hotel offering comfortable stays in Punjab's industrial hub."
+                                            },
+                                            {
+                                                id: 46,
+                                                name: "Taj Santacruz Mumbai",
+                                                location: "Mumbai, Maharashtra, India",
+                                                rating: 4.7,
+                                                price: 20000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Airport Proximity", "Club Lounge", "Spa", "Pool", "Fine Dining"],
+                                                description: "Luxury hotel near Mumbai airport with world-class amenities."
+                                            },
+                                            {
+                                                id: 47,
+                                                name: "Radisson Blu Agra Taj East Gate",
+                                                location: "Agra, Uttar Pradesh, India",
+                                                rating: 4.5,
+                                                price: 14000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Taj Mahal Views", "Rooftop Pool", "Spa", "Multiple Dining Options", "Fitness Center"],
+                                                description: "Contemporary hotel offering spectacular views of the Taj Mahal."
+                                            },
+                                            {
+                                                id: 48,
+                                                name: "The Manu Maharani",
+                                                location: "Haridwar, Uttarakhand, India",
+                                                rating: 4.2,
+                                                price: 8500,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Ganges View", "Ayurvedic Spa", "Yoga", "Cultural Activities", "Riverside Dining"],
+                                                description: "Spiritual retreat on the banks of the Ganges with modern comforts."
+                                            },
+                                            {
+                                                id: 49,
+                                                name: "Fortune Park Lake City Ahmedabad",
+                                                location: "Ahmedabad, Gujarat, India",
+                                                rating: 4.0,
+                                                price: 7500,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Lake View", "Business Center", "Pool", "Multi-cuisine Restaurant", "Fitness Center"],
+                                                description: "Modern business hotel with scenic lake views in Gujarat's commercial capital."
+                                            },
+                                            {
+                                                id: 50,
+                                                name: "The LaLiT Golf & Spa Resort Goa",
+                                                location: "Goa, India",
+                                                rating: 4.6,
+                                                price: 19000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["18-hole Golf Course", "Luxury Spa", "Private Beach", "Multiple Pools", "Fine Dining"],
+                                                description: "Expansive resort offering golf, beach access and premium amenities."
+                                            },
+                                            {
+                                                id: 51,
+                                                name: "Taj Chandigarh",
+                                                location: "Chandigarh, India",
+                                                rating: 4.7,
+                                                price: 17000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Le Corbusier-inspired Design", "Spa", "Rooftop Dining", "Pool", "Art Collection"],
+                                                description: "Architecturally significant hotel reflecting Chandigarh's modernist heritage."
+                                            },
+                                            {
+                                                id: 52,
+                                                name: "The Raintree Hotel Anna Salai",
+                                                location: "Chennai, Tamil Nadu, India",
+                                                rating: 4.1,
+                                                price: 8000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["City Center Location", "Rooftop Pool", "Spa", "Business Center", "Multiple Dining Options"],
+                                                description: "Contemporary hotel in Chennai's prime commercial district."
+                                            },
+                                            {
+                                                id: 53,
+                                                name: "Hyatt Raipur",
+                                                location: "Raipur, Chhattisgarh, India",
+                                                rating: 4.3,
+                                                price: 11000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Regency Club", "Spa", "Pool", "Business Facilities", "Fine Dining"],
+                                                description: "Premium hotel in the emerging business hub of central India."
+                                            },
+                                            {
+                                                id: 54,
+                                                name: "Taj Ganges Varanasi",
+                                                location: "Varanasi, Uttar Pradesh, India",
+                                                rating: 4.6,
+                                                price: 16000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Ganges Views", "Spiritual Activities", "Spa", "Cultural Performances", "Fine Dining"],
+                                                description: "Luxury hotel offering spiritual experiences in India's holiest city."
+                                            },
+                                            {
+                                                id: 55,
+                                                name: "The Leela Ambience Gurugram",
+                                                location: "Gurugram, Haryana, India",
+                                                rating: 4.5,
+                                                price: 15000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Manicured Gardens", "Luxury Spa", "Multiple Dining Options", "Pool", "Business Center"],
+                                                description: "Urban resort with expansive gardens in Delhi's satellite city."
+                                            },
+                                            {
+                                                id: 56,
+                                                name: "Taj Bengal Kolkata",
+                                                location: "Kolkata, West Bengal, India",
+                                                rating: 4.7,
+                                                price: 18000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Colonial Charm", "Spa", "Pool", "Fine Dining", "Cultural Activities"],
+                                                description: "Iconic hotel blending colonial heritage with modern luxury."
+                                            },
+                                            {
+                                                id: 57,
+                                                name: "ITC Kohenur Hyderabad",
+                                                location: "Hyderabad, Telangana, India",
+                                                rating: 4.8,
+                                                price: 22000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Luxury Spa", "Multiple Dining Options", "Pool", "Business Center", "Art Collection"],
+                                                description: "Modern luxury hotel inspired by Hyderabad's diamond history."
+                                            },
+                                            {
+                                                id: 58,
+                                                name: "The Gateway Hotel Ambad Nashik",
+                                                location: "Nashik, Maharashtra, India",
+                                                rating: 4.2,
+                                                price: 8500,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Vineyard Tours", "Pool", "Spa", "Business Facilities", "Multi-cuisine Restaurant"],
+                                                description: "Comfortable stay option in Maharashtra's wine country."
+                                            },
+                                            {
+                                                id: 59,
+                                                name: "Radisson Blu Hotel Guwahati",
+                                                location: "Guwahati, Assam, India",
+                                                rating: 4.3,
+                                                price: 9500,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Brahmaputra Views", "Spa", "Pool", "Business Center", "Regional Cuisine"],
+                                                description: "Premium hotel in Assam's largest city with river views."
+                                            },
+                                            {
+                                                id: 60,
+                                                name: "The Fern An Ecotel Hotel Jaipur",
+                                                location: "Jaipur, Rajasthan, India",
+                                                rating: 4.1,
+                                                price: 7500,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Eco-friendly", "Rooftop Restaurant", "Fitness Center", "Conference Facilities", "24/7 Room Service"],
+                                                description: "Sustainable hotel option in the Pink City."
+                                            },
+                                            {
+                                                id: 61,
+                                                name: "Taj Connemara Chennai",
+                                                location: "Chennai, Tamil Nadu, India",
+                                                rating: 4.5,
+                                                price: 14000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Colonial Heritage", "Spa", "Pool", "Fine Dining", "Cultural Activities"],
+                                                description: "Historic hotel preserving Chennai's colonial charm."
+                                            },
+                                            {
+                                                id: 62,
+                                                name: "The Park Baga River Goa",
+                                                location: "Goa, India",
+                                                rating: 4.4,
+                                                price: 12000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Riverfront Location", "Nightclub", "Spa", "Pool", "Multiple Dining Options"],
+                                                description: "Vibrant hotel known for its nightlife and riverside setting."
+                                            },
+                                            {
+                                                id: 63,
+                                                name: "Hyatt Regency Ahmedabad",
+                                                location: "Ahmedabad, Gujarat, India",
+                                                rating: 4.6,
+                                                price: 16000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Regency Club", "Spa", "Pool", "Business Facilities", "Fine Dining"],
+                                                description: "Contemporary luxury in Gujarat's commercial capital."
+                                            },
+                                            {
+                                                id: 64,
+                                                name: "Taj Deccan Hyderabad",
+                                                location: "Hyderabad, Telangana, India",
+                                                rating: 4.4,
+                                                price: 13000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Business Facilities", "Spa", "Pool", "Multiple Dining Options", "Fitness Center"],
+                                                description: "Modern business hotel in Hyderabad's commercial hub."
+                                            },
+                                            {
+                                                id: 65,
+                                                name: "The Gateway Hotel Beach Road Visakhapatnam",
+                                                location: "Visakhapatnam, Andhra Pradesh, India",
+                                                rating: 4.2,
+                                                price: 9000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Beach Proximity", "Pool", "Business Facilities", "Multi-cuisine Restaurant", "Fitness Center"],
+                                                description: "Comfortable stay option on Vizag's famous Beach Road."
+                                            },
+                                            {
+                                                id: 66,
+                                                name: "Radisson Blu Hotel Pune Hinjawadi",
+                                                location: "Pune, Maharashtra, India",
+                                                rating: 4.3,
+                                                price: 11000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Tech Park Location", "Spa", "Pool", "Business Center", "Multiple Dining Options"],
+                                                description: "Modern hotel in Pune's IT hub with excellent business facilities."
+                                            },
+                                            {
+                                                id: 67,
+                                                name: "The Fern Residency Coimbatore",
+                                                location: "Coimbatore, Tamil Nadu, India",
+                                                rating: 4.0,
+                                                price: 7000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Eco-friendly", "Business Facilities", "Fitness Center", "Multi-cuisine Restaurant", "24/7 Room Service"],
+                                                description: "Sustainable hotel option in Tamil Nadu's industrial city."
+                                            },
+                                            {
+                                                id: 68,
+                                                name: "Taj Madikeri Resort & Spa Coorg",
+                                                location: "Coorg, Karnataka, India",
+                                                rating: 4.7,
+                                                price: 21000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Coffee Plantation Setting", "Luxury Spa", "Infinity Pool", "Nature Walks", "Fine Dining"],
+                                                description: "Luxury resort nestled in Coorg's coffee estates."
+                                            },
+                                            {
+                                                id: 69,
+                                                name: "The LaLiT Mumbai",
+                                                location: "Mumbai, Maharashtra, India",
+                                                rating: 4.5,
+                                                price: 17000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["City Views", "Luxury Spa", "Multiple Dining Options", "Pool", "Business Center"],
+                                                description: "Contemporary luxury in Mumbai's business district."
+                                            },
+                                            {
+                                                id: 70,
+                                                name: "ITC Royal Bengal Kolkata",
+                                                location: "Kolkata, West Bengal, India",
+                                                rating: 4.8,
+                                                price: 23000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Luxury Spa", "Multiple Dining Options", "Pool", "Business Center", "Art Collection"],
+                                                description: "Grand hotel inspired by Bengal's royal heritage."
+                                            },
+                                            {
+                                                id: 71,
+                                                name: "Hyatt Regency Delhi",
+                                                location: "New Delhi, India",
+                                                rating: 4.6,
+                                                price: 19000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Regency Club", "Spa", "Pool", "Business Facilities", "Fine Dining"],
+                                                description: "Contemporary luxury in India's capital city."
+                                            },
+                                            {
+                                                id: 72,
+                                                name: "Taj Fisherman's Cove Chennai",
+                                                location: "Chennai, Tamil Nadu, India",
+                                                rating: 4.5,
+                                                price: 18000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Beachfront Location", "Spa", "Pool", "Water Sports", "Fine Dining"],
+                                                description: "Seaside resort with colonial charm near Chennai."
+                                            },
+                                            {
+                                                id: 73,
+                                                name: "The Gateway Hotel Ernakulam",
+                                                location: "Kochi, Kerala, India",
+                                                rating: 4.2,
+                                                price: 9500,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Backwater Views", "Spa", "Pool", "Business Facilities", "Regional Cuisine"],
+                                                description: "Comfortable stay option in Kerala's commercial capital."
+                                            },
+                                            {
+                                                id: 74,
+                                                name: "Radisson Blu Hotel Udaipur",
+                                                location: "Udaipur, Rajasthan, India",
+                                                rating: 4.4,
+                                                price: 14000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Lake Views", "Spa", "Pool", "Multiple Dining Options", "Fitness Center"],
+                                                description: "Modern luxury with views of Udaipur's famous lakes."
+                                            },
+                                            {
+                                                id: 75,
+                                                name: "The Fern Residency Lucknow",
+                                                location: "Lucknow, Uttar Pradesh, India",
+                                                rating: 4.1,
+                                                price: 8000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Eco-friendly", "Business Facilities", "Fitness Center", "Multi-cuisine Restaurant", "24/7 Room Service"],
+                                                description: "Sustainable hotel option in the City of Nawabs."
+                                            },
+                                            {
+                                                id: 76,
+                                                name: "Taj Holiday Village Resort Goa",
+                                                location: "Goa, India",
+                                                rating: 4.6,
+                                                price: 20000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Beach Access", "Goan-Portuguese Villas", "Spa", "Pool", "Cultural Activities"],
+                                                description: "Charming resort with Goan village-inspired architecture."
+                                            },
+                                            {
+                                                id: 77,
+                                                name: "The LaLiT New Delhi",
+                                                location: "New Delhi, India",
+                                                rating: 4.7,
+                                                price: 21000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Central Location", "Luxury Spa", "Multiple Dining Options", "Pool", "Business Center"],
+                                                description: "Contemporary luxury in Delhi's diplomatic area."
+                                            },
+                                            {
+                                                id: 78,
+                                                name: "ITC Sonar Kolkata",
+                                                location: "Kolkata, West Bengal, India",
+                                                rating: 4.7,
+                                                price: 20000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Luxury Spa", "Multiple Dining Options", "Pool", "Business Center", "Art Collection"],
+                                                description: "Modern luxury hotel inspired by Bengal's cultural heritage."
+                                            },
+                                            {
+                                                id: 79,
+                                                name: "Hyatt Regency Chandigarh",
+                                                location: "Chandigarh, India",
+                                                rating: 4.5,
+                                                price: 16000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Regency Club", "Spa", "Pool", "Business Facilities", "Fine Dining"],
+                                                description: "Contemporary luxury in India's first planned city."
+                                            },
+                                            {
+                                                id: 80,
+                                                name: "Taj Bekal Resort & Spa Kerala",
+                                                location: "Kasaragod, Kerala, India",
+                                                rating: 4.6,
+                                                price: 19000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Backwater Views", "Ayurvedic Spa", "Pool", "Cultural Activities", "Fine Dining"],
+                                                description: "Luxury resort showcasing Kerala's traditional architecture."
+                                            },
+                                            {
+                                                id: 81,
+                                                name: "The Gateway Hotel Coimbatore",
+                                                location: "Coimbatore, Tamil Nadu, India",
+                                                rating: 4.1,
+                                                price: 8500,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Business Facilities", "Spa", "Pool", "Multi-cuisine Restaurant", "Fitness Center"],
+                                                description: "Comfortable stay option in Tamil Nadu's textile hub."
+                                            },
+                                            {
+                                                id: 82,
+                                                name: "Radisson Blu Plaza Hotel Delhi Airport",
+                                                location: "New Delhi, India",
+                                                rating: 4.4,
+                                                price: 13000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Airport Proximity", "Spa", "Pool", "Business Center", "Multiple Dining Options"],
+                                                description: "Convenient luxury near Delhi's international airport."
+                                            },
+                                            {
+                                                id: 83,
+                                                name: "The Fern Residency Nagpur",
+                                                location: "Nagpur, Maharashtra, India",
+                                                rating: 4.0,
+                                                price: 7500,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Eco-friendly", "Business Facilities", "Fitness Center", "Multi-cuisine Restaurant", "24/7 Room Service"],
+                                                description: "Sustainable hotel option in Maharashtra's orange city."
+                                            },
+                                            {
+                                                id: 84,
+                                                name: "Taj Aravali Resort & Spa Udaipur",
+                                                location: "Udaipur, Rajasthan, India",
+                                                rating: 4.7,
+                                                price: 22000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Aravalli Views", "Luxury Spa", "Pool", "Cultural Activities", "Fine Dining"],
+                                                description: "Luxury resort blending traditional and contemporary Rajasthani design."
+                                            },
+                                            {
+                                                id: 85,
+                                                name: "The LaLiT Laxmi Vilas Palace Udaipur",
+                                                location: "Udaipur, Rajasthan, India",
+                                                rating: 4.8,
+                                                price: 25000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Palatial Suites", "Lake Views", "Spa", "Fine Dining", "Cultural Performances"],
+                                                description: "19th-century palace turned luxury hotel with modern amenities."
+                                            },
+                                            {
+                                                id: 86,
+                                                name: "ITC Mughal Agra",
+                                                location: "Agra, Uttar Pradesh, India",
+                                                rating: 4.7,
+                                                price: 21000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Mughal-inspired Gardens", "Luxury Spa", "Pool", "Fine Dining", "Taj Mahal Views"],
+                                                description: "Luxury hotel inspired by Mughal architecture and gardens."
+                                            },
+                                            {
+                                                id: 87,
+                                                name: "Hyatt Regency Pune",
+                                                location: "Pune, Maharashtra, India",
+                                                rating: 4.5,
+                                                price: 15000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Regency Club", "Spa", "Pool", "Business Facilities", "Fine Dining"],
+                                                description: "Contemporary luxury in Maharashtra's cultural capital."
+                                            },
+                                            {
+                                                id: 88,
+                                                name: "Taj Fort Aguada Resort & Spa Goa",
+                                                location: "Goa, India",
+                                                rating: 4.6,
+                                                price: 20000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Beach Access", "Heritage Fort", "Spa", "Pool", "Cultural Activities"],
+                                                description: "17th-century Portuguese fort turned luxury beach resort."
+                                            },
+                                            {
+                                                id: 89,
+                                                name: "The Gateway Hotel Ambey Valley",
+                                                location: "Lonavala, Maharashtra, India",
+                                                rating: 4.3,
+                                                price: 11000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Hill Station Location", "Spa", "Pool", "Nature Walks", "Multi-cuisine Restaurant"],
+                                                description: "Comfortable stay option in Maharashtra's popular hill station."
+                                            },
+                                            {
+                                                id: 90,
+                                                name: "Radisson Blu Hotel Greater Noida",
+                                                location: "Greater Noida, Uttar Pradesh, India",
+                                                rating: 4.2,
+                                                price: 10000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Business Facilities", "Spa", "Pool", "Multiple Dining Options", "Fitness Center"],
+                                                description: "Modern hotel in Delhi NCR's emerging business district."
+                                            },
+                                            {
+                                                id: 91,
+                                                name: "The Fern Residency Indore",
+                                                location: "Indore, Madhya Pradesh, India",
+                                                rating: 4.1,
+                                                price: 8000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Eco-friendly", "Business Facilities", "Fitness Center", "Multi-cuisine Restaurant", "24/7 Room Service"],
+                                                description: "Sustainable hotel option in Madhya Pradesh's commercial capital."
+                                            },
+                                            {
+                                                id: 92,
+                                                name: "Taj Rishikesh Resort & Spa Uttarakhand",
+                                                location: "Rishikesh, Uttarakhand, India",
+                                                rating: 4.7,
+                                                price: 23000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Ganges Views", "Yoga Retreat", "Spa", "Nature Activities", "Fine Dining"],
+                                                description: "Luxury resort offering spiritual experiences in the Yoga Capital."
+                                            },
+                                            {
+                                                id: 93,
+                                                name: "The LaLiT Mangalore",
+                                                location: "Mangalore, Karnataka, India",
+                                                rating: 4.3,
+                                                price: 12000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Beach Proximity", "Spa", "Pool", "Business Facilities", "Regional Cuisine"],
+                                                description: "Contemporary luxury on Karnataka's coastal city."
+                                            },
+                                            {
+                                                id: 94,
+                                                name: "ITC Rajputana Jaipur",
+                                                location: "Jaipur, Rajasthan, India",
+                                                rating: 4.6,
+                                                price: 19000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Rajasthani Architecture", "Luxury Spa", "Pool", "Cultural Activities", "Fine Dining"],
+                                                description: "Luxury hotel inspired by Rajasthan's royal heritage."
+                                            },
+                                            {
+                                                id: 95,
+                                                name: "Hyatt Regency Ahmedabad",
+                                                location: "Ahmedabad, Gujarat, India",
+                                                rating: 4.5,
+                                                price: 16000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Regency Club", "Spa", "Pool", "Business Facilities", "Fine Dining"],
+                                                description: "Contemporary luxury in Gujarat's largest city."
+                                            },
+                                            {
+                                                id: 96,
+                                                name: "Taj Chia Kutir Resort & Spa Darjeeling",
+                                                location: "Darjeeling, West Bengal, India",
+                                                rating: 4.7,
+                                                price: 24000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Tea Estate Setting", "Luxury Spa", "Pool", "Nature Walks", "Fine Dining"],
+                                                description: "Luxury resort amidst Darjeeling's famous tea gardens."
+                                            },
+                                            {
+                                                id: 97,
+                                                name: "The Gateway Hotel Residency Road Bangalore",
+                                                location: "Bangalore, Karnataka, India",
+                                                rating: 4.2,
+                                                price: 11000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["City Center Location", "Spa", "Pool", "Business Facilities", "Multi-cuisine Restaurant"],
+                                                description: "Comfortable stay option in Bangalore's business district."
+                                            },
+                                            {
+                                                id: 98,
+                                                name: "Radisson Blu Hotel Guwahati",
+                                                location: "Guwahati, Assam, India",
+                                                rating: 4.3,
+                                                price: 12000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Brahmaputra Views", "Spa", "Pool", "Business Center", "Regional Cuisine"],
+                                                description: "Premium hotel in Assam's gateway city."
+                                            },
+                                            {
+                                                id: 99,
+                                                name: "The Fern Residency Vadodara",
+                                                location: "Vadodara, Gujarat, India",
+                                                rating: 4.1,
+                                                price: 8500,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["Eco-friendly", "Business Facilities", "Fitness Center", "Multi-cuisine Restaurant", "24/7 Room Service"],
+                                                description: "Sustainable hotel option in Gujarat's cultural capital."
+                                            },
+                                            {
+                                                id: 100,
+                                                name: "Taj Krishna Hyderabad",
+                                                location: "Hyderabad, Telangana, India",
+                                                rating: 4.6,
+                                                price: 18000,
+                                                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?...",
+                                                amenities: ["City Views", "Luxury Spa", "Pool", "Fine Dining", "Cultural Activities"],
+                                                description: "Iconic luxury hotel in Hyderabad's upscale Banjara Hills."
+                                            
+                
+                }
+            ];
+
+            // Variables to store booking data
+            let selectedHotel = null;
+            let checkInDate = null;
+            let checkOutDate = null;
+            let guests = 2;
+            let nights = 3;
+
+            // Search hotels function
+            searchHotelsBtn.addEventListener('click', function() {
+                const destination = document.getElementById('destination').value;
+                checkInDate = document.getElementById('check-in').value;
+                checkOutDate = document.getElementById('check-out').value;
+                guests = document.getElementById('guests').value;
+                
+                if (!destination) {
+                    alert('Please enter a destination');
+                    return;
+                }
+                
+                if (!checkInDate || !checkOutDate) {
+                    alert('Please select check-in and check-out dates');
+                    return;
+                }
+                
+                // Calculate number of nights
+                const checkIn = new Date(checkInDate);
+                const checkOut = new Date(checkOutDate);
+                nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+                
+                if (nights <= 0) {
+                    alert('Check-out date must be after check-in date');
+                    return;
+                }
+                
+                // Show loading state
+                hotelsList.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Searching hotels...</p>';
+               let Hotels= searchHotels(destination,sampleHotels)
+
+                // Simulate API call with timeout
+                setTimeout(() => {
+                    displayHotels(Hotels);
+                }, 1000);
+            });
+            function searchHotels(query, hotels) {
+                if (!query || query.trim() === '') {
+                    return hotels;
+                }
+
+                const searchQuery = query.toLowerCase().trim();
+
+                return hotels.filter(hotel => {
+                    const nameMatch = hotel.name?.toLowerCase().includes(searchQuery);
+
+                    const locationMatch = hotel.location?.toLowerCase().includes(searchQuery);
+
+                    const amenitiesMatch = hotel.amenities?.some(amenity => 
+                    amenity.toLowerCase().includes(searchQuery)
+                    );
+
+                    const descriptionMatch = hotel.description?.toLowerCase().includes(searchQuery);
+
+                    return nameMatch || locationMatch || amenitiesMatch || descriptionMatch;
+                });
+                }
+
+            // Display hotels function
+            function displayHotels(hotels) {
+                hotelsList.innerHTML = '';
+                
+                if (hotels.length === 0) {
+                    hotelsList.innerHTML = '<p>No hotels found matching your criteria. Try different dates or location.</p>';
+                    return;
+                }
+                
+                hotels.forEach(hotel => {
+                    const hotelElement = document.createElement('div');
+                    hotelElement.className = 'hotel-card';
+                    hotelElement.dataset.id = hotel.id;
+                    
+                    hotelElement.innerHTML = `
+                        <div class="hotel-image">
+                            <img src="${hotel.image}" alt="${hotel.name}">
+                            <div class="hotel-rating">
+                                <i class="fas fa-star"></i> ${hotel.rating}
+                            </div>
+                        </div>
+                        <div class="hotel-details">
+                            <div class="hotel-header">
+                                <div class="hotel-title">${hotel.name}</div>
+                                <div class="hotel-price">₹${hotel.price.toLocaleString()}<small>/night</small></div>
+                            </div>
+                            <div class="hotel-location">
+                                <i class="fas fa-map-marker-alt"></i> ${hotel.location}
+                            </div>
+                            <p class="hotel-description">${hotel.description}</p>
+                            <div class="hotel-amenities">
+                                ${hotel.amenities.map(amenity => `
+                                    <div class="amenity">
+                                        <i class="fas fa-check"></i> ${amenity}
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div class="hotel-actions">
+                                <button class="plan-btn small-btn select-hotel" data-id="${hotel.id}">
+                                    <i class="fas fa-bed"></i> Select Room
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    hotelsList.appendChild(hotelElement);
+                });
+                
+                // Add event listeners to select buttons
+                document.querySelectorAll('.select-hotel').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const hotelId = parseInt(this.dataset.id);
+                        selectHotel(hotelId);
+                    });
+                });
+            }
+
+            // Select hotel function
+            function selectHotel(hotelId) {
+                selectedHotel = sampleHotels.find(hotel => hotel.id === hotelId);
+                
+                if (!selectedHotel) return;
+                
+                // Update booking summary
+                const totalPrice = selectedHotel.price * nights;
+                const formattedCheckIn = formatDate(checkInDate);
+                const formattedCheckOut = formatDate(checkOutDate);
+                
+                bookingSummary.innerHTML = `
+                    <h3><i class="fas fa-receipt"></i> Booking Summary</h3>
+                    <div class="selected-hotel">
+                        <div class="selected-hotel-header">
+                            <div class="selected-hotel-title">${selectedHotel.name}</div>
+                            <div class="selected-hotel-price">₹${selectedHotel.price.toLocaleString()}/night</div>
+                        </div>
+                        <div class="selected-hotel-dates">${formattedCheckIn} - ${formattedCheckOut} (${nights} nights)</div>
+                    </div>
+                    <div class="booking-details">
+                        <div class="booking-detail">
+                            <span>${nights} nights x ₹${selectedHotel.price.toLocaleString()}</span>
+                            <span>₹${(selectedHotel.price * nights).toLocaleString()}</span>
+                        </div>
+                        <div class="booking-detail">
+                            <span>Taxes & Fees</span>
+                            <span>₹${Math.round(selectedHotel.price * nights * 0.18).toLocaleString()}</span>
+                        </div>
+                        <div class="booking-detail total">
+                            <span>Total</span>
+                            <span>₹${Math.round(selectedHotel.price * nights * 1.18).toLocaleString()}</span>
+                        </div>
+                    </div>
+                    <div class="booking-actions">
+                        <button class="plan-btn" id="book-now">
+                            <i class="fas fa-credit-card"></i> Book Now
+                        </button>
+                    </div>
+                `;
+                
+                // Add event listener to book now button
+                document.getElementById('book-now').addEventListener('click', showBookingModal);
+            }
+
+            // Show booking modal function
+            function showBookingModal() {
+                if (!selectedHotel) return;
+                
+                const formattedCheckIn = formatDate(checkInDate);
+                const formattedCheckOut = formatDate(checkOutDate);
+                const totalPrice = Math.round(selectedHotel.price * nights * 1.18);
+                
+                // Update modal content
+                document.getElementById('modal-hotel-name').textContent = selectedHotel.name;
+                document.getElementById('modal-hotel-price').textContent = `₹${totalPrice.toLocaleString()}`;
+                document.getElementById('modal-hotel-dates').textContent = 
+                    `${formattedCheckIn} - ${formattedCheckOut} (${nights} nights)`;
+                
+                // Show modal
+                bookingModal.classList.add('active');
+                
+                // Reset form
+                document.getElementById('full-name').value = '';
+                document.getElementById('email').value = '';
+                document.getElementById('phone').value = '';
+                document.getElementById('card-number').value = '';
+                document.getElementById('expiry-date').value = '';
+                document.getElementById('cvv').value = '';
+                document.getElementById('card-name').value = '';
+            }
+
+            // Close modal function
+            function closeModal() {
+                bookingModal.classList.remove('active');
+            }
+
+            // Close confirmation modal function
+            function closeConfirmationModal() {
+                confirmationModal.classList.remove('active');
+            }
+
+            // Format date function
+            function formatDate(dateString) {
+                const options = { month: 'short', day: 'numeric', year: 'numeric' };
+                return new Date(dateString).toLocaleDateString('en-US', options);
+            }
+
+            // Event listeners for modals
+            modalClose.addEventListener('click', closeModal);
+            cancelBookingBtn.addEventListener('click', closeModal);
+            
+            confirmBookingBtn.addEventListener('click', function() {
+                // Validate form
+                const fullName = document.getElementById('full-name').value;
+                const email = document.getElementById('email').value;
+                const phone = document.getElementById('phone').value;
+                const cardNumber = document.getElementById('card-number').value;
+                const expiryDate = document.getElementById('expiry-date').value;
+                const cvv = document.getElementById('cvv').value;
+                const cardName = document.getElementById('card-name').value;
+                
+                if (!fullName || !email || !phone || !cardNumber || !expiryDate || !cvv || !cardName) {
+                    alert('Please fill in all required fields');
+                    return;
+                }
+                
+                // Simulate payment processing
+                confirmBookingBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                confirmBookingBtn.disabled = true;
+                
+                setTimeout(() => {
+                    // Show confirmation
+                    showConfirmation();
+                    
+                    // Reset button
+                    confirmBookingBtn.innerHTML = '<i class="fas fa-lock"></i> Confirm Booking';
+                    confirmBookingBtn.disabled = false;
+                    
+                    // Close booking modal
+                    closeModal();
+                }, 2000);
+            });
+            
+            doneButton.addEventListener('click', function() {
+                closeConfirmationModal();
+            });
+
+            // Show confirmation function
+            function showConfirmation() {
+                if (!selectedHotel) return;
+                
+                const totalPrice = Math.round(selectedHotel.price * nights * 1.18);
+                const formattedCheckIn = formatDate(checkInDate);
+                const formattedCheckOut = formatDate(checkOutDate);
+                
+                // Update confirmation modal
+                document.getElementById('confirmation-hotel').textContent = selectedHotel.name;
+                document.getElementById('confirmation-dates').textContent = 
+                    `${formattedCheckIn} - ${formattedCheckOut} (${nights} nights)`;
+                document.getElementById('confirmation-guests').textContent = guests;
+                document.getElementById('confirmation-total').textContent = `₹${totalPrice.toLocaleString()}`;
+                
+                // Show modal
+                confirmationModal.classList.add('active');
+            }
+
+            // Payment method selection
+            document.querySelectorAll('.payment-method').forEach(method => {
+                method.addEventListener('click', function() {
+                    document.querySelectorAll('.payment-method').forEach(m => {
+                        m.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                });
+            });
+
+            // Set default dates (today + 3 days)
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            const defaultCheckOut = new Date(today);
+            defaultCheckOut.setDate(defaultCheckOut.getDate() + 3);
+            
+            document.getElementById('check-in').valueAsDate = tomorrow;
+            document.getElementById('check-out').valueAsDate = defaultCheckOut;
+        });
+    </script>
+</body>
+</html>

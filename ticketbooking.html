@@ -1,0 +1,4089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Trip | Ticket Booking</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Base Styles with Enhanced Variables */
+        :root {
+            --primary: #6C63FF;
+            --primary-light: #8a84ff;
+            --secondary: #FF6584;
+            --accent: #43C6AC;
+            --accent-dark: #2fa58f;
+            --dark: #2D3748;
+            --dark-light: #4a5568;
+            --light: #F7FAFC;
+            --gradient: linear-gradient(135deg, #6C63FF 0%, #43C6AC 100%);
+            --gradient-hover: linear-gradient(135deg, #5a52e0 0%, #3ab79e 100%);
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+            --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.2);
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            --border-radius: 16px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Header Styles with Sticky Effect */
+        header {
+            background: white;
+            color: var(--dark);
+            padding: 1rem 0;
+            box-shadow: var(--shadow-sm);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            transition: var(--transition);
+        }
+
+        header.scrolled {
+            padding: 0.5rem 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            color: var(--primary);
+        }
+
+        .logo i {
+            margin-right: 0.5rem;
+            font-size: 2rem;
+            transition: var(--transition);
+        }
+
+        .logo:hover i {
+            transform: rotate(-15deg);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-left: 2rem;
+            position: relative;
+        }
+
+        nav ul li a {
+            color: var(--dark);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 0.5rem 0;
+            position: relative;
+        }
+
+        nav ul li a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary);
+            transition: width 0.4s ease;
+        }
+
+        nav ul li a:hover::after {
+            width: 100%;
+        }
+
+        nav ul li a:hover {
+            color: var(--primary);
+        }
+
+        .btn-outline {
+            border: 2px solid var(--primary);
+            background: transparent;
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+        }
+
+        .btn-solid {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+        }
+
+        .btn-solid:hover {
+            background: var(--gradient-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(108, 99, 255, 0.4);
+        }
+
+        /* Hamburger Menu for Mobile */
+        .hamburger {
+            display: none;
+            cursor: pointer;
+            width: 30px;
+            height: 20px;
+            position: relative;
+            z-index: 1001;
+        }
+
+        .hamburger span {
+            display: block;
+            position: absolute;
+            height: 3px;
+            width: 100%;
+            background: var(--primary);
+            border-radius: 3px;
+            opacity: 1;
+            left: 0;
+            transform: rotate(0deg);
+            transition: var(--transition);
+        }
+
+        .hamburger span:nth-child(1) {
+            top: 0;
+        }
+
+        .hamburger span:nth-child(2), .hamburger span:nth-child(3) {
+            top: 10px;
+        }
+
+        .hamburger span:nth-child(4) {
+            top: 20px;
+        }
+
+        .hamburger.open span:nth-child(1) {
+            top: 10px;
+            width: 0%;
+            left: 50%;
+        }
+
+        .hamburger.open span:nth-child(2) {
+            transform: rotate(45deg);
+        }
+
+        .hamburger.open span:nth-child(3) {
+            transform: rotate(-45deg);
+        }
+
+        .hamburger.open span:nth-child(4) {
+            top: 10px;
+            width: 0%;
+            left: 50%;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1400px;
+            margin: 6rem auto;
+            padding: 0 2rem;
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .page-header h1 {
+            font-size: 2.8rem;
+            color: var(--dark);
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            position: relative;
+        }
+
+        .page-header h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 80px;
+            height: 4px;
+            background: var(--gradient);
+            border-radius: 2px;
+        }
+
+        /* Ticket Search Section */
+        .ticket-search-section {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2.5rem;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            animation: fadeIn 0.8s ease-out forwards;
+            opacity: 0;
+        }
+
+        .ticket-search-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--gradient);
+            transition: var(--transition);
+        }
+
+        .ticket-search-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .ticket-search-section:hover::before {
+            height: 8px;
+        }
+
+        .section-title {
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-title i {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+            transition: var(--transition);
+        }
+
+        .section-title:hover i {
+            transform: scale(1.1) rotate(10deg);
+        }
+
+        .section-title h2 {
+            font-size: 1.8rem;
+            color: var(--dark);
+            transition: var(--transition);
+        }
+
+        .section-title:hover h2 {
+            color: var(--primary);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+            transition: var(--transition);
+        }
+
+        .form-group:hover label {
+            color: var(--primary);
+        }
+
+        .form-group input, 
+        .form-group select, 
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus, 
+        .form-group select:focus, 
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.2);
+        }
+
+        .form-group:hover input,
+        .form-group:hover select,
+        .form-group:hover textarea {
+            border-color: var(--primary-light);
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+            gap: 1rem;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 2rem;
+        }
+
+        .tab {
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .tab.active {
+            color: var(--primary);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .plan-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.9rem 2rem;
+            background: var(--gradient);
+            color: white;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .plan-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
+            transform: translateX(-100%);
+            transition: var(--transition);
+        }
+
+        .plan-btn:hover {
+            transform: translateY(-3px);
+            background: var(--gradient-hover);
+            box-shadow: 0 10px 25px rgba(108, 99, 255, 0.4);
+        }
+
+        .plan-btn:hover::after {
+            transform: translateX(100%);
+        }
+
+        .plan-btn i {
+            transition: var(--transition);
+        }
+
+        .plan-btn:hover i {
+            transform: translateX(3px);
+        }
+
+        /* Results Layout */
+        .results-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 992px) {
+            .results-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Tickets List */
+        .tickets-list {
+            height: 500px;
+            overflow-y: auto;
+            padding-right: 1rem;
+        }
+
+        .ticket-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .ticket-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #edf2f7;
+        }
+
+        .ticket-provider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .ticket-provider-logo {
+            width: 40px;
+            height: 40px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+
+        .ticket-provider-name {
+            font-weight: 600;
+        }
+
+        .ticket-price {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.3rem;
+        }
+
+        .ticket-details {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .ticket-departure, .ticket-arrival {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ticket-time {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .ticket-date {
+            color: var(--dark-light);
+            font-size: 0.9rem;
+        }
+
+        .ticket-place {
+            font-weight: 500;
+        }
+
+        .ticket-duration {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--dark-light);
+            font-size: 0.9rem;
+        }
+
+        .ticket-duration-line {
+            width: 100%;
+            height: 1px;
+            background: #e2e8f0;
+            position: relative;
+            margin: 0.5rem 0;
+        }
+
+        .ticket-duration-line::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: 0;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+        }
+
+        .ticket-duration-line::after {
+            content: '';
+            position: absolute;
+            top: -3px;
+            right: 0;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--secondary);
+        }
+
+        .ticket-amenities {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .amenity {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.3rem 0.6rem;
+            background: rgba(108, 99, 255, 0.1);
+            border-radius: 50px;
+            color: var(--primary);
+            font-size: 0.8rem;
+        }
+
+        .amenity i {
+            font-size: 0.9rem;
+        }
+
+        .ticket-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 1rem;
+        }
+
+        /* Booking Summary */
+        .booking-summary {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            height: 500px;
+            overflow-y: auto;
+            transition: var(--transition);
+        }
+
+        .booking-summary:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .booking-summary h3 {
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .selected-ticket {
+            padding: 1rem 0;
+            border-bottom: 1px solid #edf2f7;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .selected-ticket:last-child {
+            border-bottom: none;
+        }
+
+        .selected-ticket-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .selected-ticket-title {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .selected-ticket-price {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+
+        .selected-ticket-dates {
+            font-size: 0.9rem;
+            color: var(--dark-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .booking-details {
+            margin-top: 1.5rem;
+        }
+
+        .booking-detail {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .booking-detail.total {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .booking-actions {
+            margin-top: 1.5rem;
+        }
+
+        /* Booking Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .booking-modal {
+            background: white;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 2rem;
+            transform: translateY(20px);
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .modal-overlay.active .booking-modal {
+            transform: translateY(0);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #f5f5f5;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .modal-header {
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .modal-header h3 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-header p {
+            color: var(--dark-light);
+        }
+
+        .passenger-info {
+            margin-bottom: 1.5rem;
+        }
+
+        .passenger-info h4 {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .payment-methods {
+            margin: 1.5rem 0;
+        }
+
+        .payment-method {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .payment-method:hover {
+            border-color: var(--primary-light);
+        }
+
+        .payment-method.active {
+            border-color: var(--primary);
+            background: rgba(108, 99, 255, 0.05);
+        }
+
+        .payment-method-icon {
+            width: 40px;
+            height: 40px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.2rem;
+            color: var(--dark);
+        }
+
+        .payment-method-details {
+            flex: 1;
+        }
+
+        .payment-method-title {
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+
+        .payment-method-description {
+            font-size: 0.8rem;
+            color: var(--dark-light);
+        }
+
+        .payment-form {
+            margin-top: 1.5rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+            gap: 1rem;
+        }
+
+        /* Confirmation Modal */
+        .confirmation-modal {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .confirmation-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: white;
+            font-size: 2rem;
+            animation: bounceIn 0.6s ease-out;
+        }
+
+        .confirmation-details {
+            margin: 1.5rem 0;
+            text-align: left;
+            background: #f9f9f9;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+        }
+
+        .confirmation-detail {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .confirmation-detail:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .confirmation-detail-label {
+            font-weight: 500;
+            color: var(--dark-light);
+        }
+
+        .confirmation-detail-value {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        /* Additional Content Sections */
+        .info-section {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .info-section h2 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        .info-section h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: var(--gradient);
+        }
+
+        .popular-routes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .route-card {
+            background: #f9f9f9;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .route-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .route-card h3 {
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .route-price {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .route-description {
+            color: var(--dark-light);
+            font-size: 0.9rem;
+        }
+
+        .travel-tips {
+            background: var(--light);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .tip-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+
+        .tip-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .tip-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(108, 99, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .tip-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .tip-content {
+            color: var(--dark-light);
+            font-size: 0.9rem;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.2); opacity: 1; }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .page-header h1 {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1.5rem;
+            }
+            
+            .ticket-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .ticket-duration {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hamburger {
+                display: block;
+            }
+            
+            nav {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 80%;
+                max-width: 350px;
+                height: 100vh;
+                background: white;
+                box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
+                transition: var(--transition);
+                z-index: 1000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            nav.active {
+                right: 0;
+            }
+            
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+                padding: 2rem;
+                width: 100%;
+            }
+            
+            nav ul li {
+                margin: 1rem 0;
+            }
+            
+            nav ul li a {
+                color: var(--dark);
+                font-size: 1.2rem;
+            }
+            
+            .header-content {
+                padding: 1rem;
+            }
+            
+            .main-content {
+                margin-top: 5rem;
+            }
+            
+            .page-header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .ticket-search-section {
+                padding: 1.5rem;
+            }
+            
+            .section-title h2 {
+                font-size: 1.5rem;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .tabs {
+                overflow-x: auto;
+                white-space: nowrap;
+                padding-bottom: 5px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .page-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .ticket-search-section {
+                padding: 1.5rem 1rem;
+            }
+            
+            .modal-actions {
+                flex-direction: column;
+            }
+            
+            .modal-actions .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header id="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-plane"></i>
+                <span>Smart Trip</span>
+            </div>
+            <nav id="nav">
+                <ul>
+                    <li><a href="afterhome.html">Home</a></li>
+                    <li><a href="#">Destinations</a></li>
+                    <li><a href="ticketbooking.html">Flights</a></li>
+                    <li><a href="hotels.html">Hotels</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </nav>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1>Ticket Booking</h1>
+        </div>
+
+        <!-- Ticket Search Section -->
+        <section class="ticket-search-section">
+            <div class="section-title">
+                <i class="fas fa-ticket-alt"></i>
+                <h2>Book Your Journey</h2>
+            </div>
+            <p>Search and book flights, trains, and buses across India and beyond. Compare prices and find the best deals for your travel.</p>
+            
+            <div class="tabs">
+                <div class="tab active" data-tab="flights">
+                    <i class="fas fa-plane"></i> Flights
+                </div>
+                <div class="tab" data-tab="trains">
+                    <i class="fas fa-train"></i> Trains
+                </div>
+                <div class="tab" data-tab="buses">
+                    <i class="fas fa-bus"></i> Buses
+                </div>
+            </div>
+            
+            <!-- Flights Tab -->
+            <div class="tab-content active" id="flights-tab">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="flight-from">From</label>
+                        <input type="text" id="flight-from" placeholder="City or airport">
+                    </div>
+                    <div class="form-group">
+                        <label for="flight-to">To</label>
+                        <input type="text" id="flight-to" placeholder="City or airport">
+                    </div>
+                    <div class="form-group">
+                        <label for="flight-departure">Departure</label>
+                        <input type="date" id="flight-departure">
+                    </div>
+                    <div class="form-group">
+                        <label for="flight-return">Return (Optional)</label>
+                        <input type="date" id="flight-return">
+                    </div>
+                    <div class="form-group">
+                        <label for="flight-class">Class</label>
+                        <select id="flight-class">
+                            <option value="economy">Economy</option>
+                            <option value="premium">Premium Economy</option>
+                            <option value="business">Business</option>
+                            <option value="first">First Class</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="flight-passengers">Passengers</label>
+                        <select id="flight-passengers">
+                            <option value="1">1 Passenger</option>
+                            <option value="2" selected>2 Passengers</option>
+                            <option value="3">3 Passengers</option>
+                            <option value="4">4 Passengers</option>
+                            <option value="5">5+ Passengers</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button class="plan-btn" id="search-flights">
+                        <i class="fas fa-search"></i> Search Flights
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Trains Tab -->
+            <div class="tab-content" id="trains-tab">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="train-from">From</label>
+                        <input type="text" id="train-from" placeholder="City or station">
+                    </div>
+                    <div class="form-group">
+                        <label for="train-to">To</label>
+                        <input type="text" id="train-to" placeholder="City or station">
+                    </div>
+                    <div class="form-group">
+                        <label for="train-date">Date</label>
+                        <input type="date" id="train-date">
+                    </div>
+                    <div class="form-group">
+                        <label for="train-class">Class</label>
+                        <select id="train-class">
+                            <option value="sleeper">Sleeper</option>
+                            <option value="3a">3A</option>
+                            <option value="2a">2A</option>
+                            <option value="1a">1A</option>
+                            <option value="cc">Chair Car</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="train-passengers">Passengers</label>
+                        <select id="train-passengers">
+                            <option value="1">1 Passenger</option>
+                            <option value="2" selected>2 Passengers</option>
+                            <option value="3">3 Passengers</option>
+                            <option value="4">4 Passengers</option>
+                            <option value="5">5+ Passengers</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button class="plan-btn" id="search-trains">
+                        <i class="fas fa-search"></i> Search Trains
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Buses Tab -->
+            <div class="tab-content" id="buses-tab">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="bus-from">From</label>
+                        <input type="text" id="bus-from" placeholder="City or bus stand">
+                    </div>
+                    <div class="form-group">
+                        <label for="bus-to">To</label>
+                        <input type="text" id="bus-to" placeholder="City or bus stand">
+                    </div>
+                    <div class="form-group">
+                        <label for="bus-date">Date</label>
+                        <input type="date" id="bus-date">
+                    </div>
+                    <div class="form-group">
+                        <label for="bus-type">Bus Type</label>
+                        <select id="bus-type">
+                            <option value="ac">AC</option>
+                            <option value="non-ac">Non-AC</option>
+                            <option value="sleeper">Sleeper</option>
+                            <option value="volvo">Volvo</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="bus-passengers">Passengers</label>
+                        <select id="bus-passengers">
+                            <option value="1">1 Passenger</option>
+                            <option value="2" selected>2 Passengers</option>
+                            <option value="3">3 Passengers</option>
+                            <option value="4">4 Passengers</option>
+                            <option value="5">5+ Passengers</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button class="plan-btn" id="search-buses">
+                        <i class="fas fa-search"></i> Search Buses
+                    </button>
+                </div>
+            </div>
+            
+            <div class="results-container">
+                <div class="tickets-list" id="tickets-list">
+                    <div class="no-tickets">
+                        <p>Search for tickets to see available options</p>
+                    </div>
+                </div>
+                
+                <div class="booking-summary" id="booking-summary">
+                    <h3><i class="fas fa-receipt"></i> Booking Summary</h3>
+                    <div class="no-selection">
+                        <p>Select a ticket to see booking details</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Popular Routes Section -->
+        <section class="info-section">
+            <h2>Popular Routes</h2>
+            <p>Discover frequently traveled routes with competitive pricing and multiple options.</p>
+            
+            <div class="popular-routes">
+                <div class="route-card">
+                    <h3>Mumbai to Delhi</h3>
+                    <div class="route-price">From ₹2,499</div>
+                    <div class="route-description">
+                        Multiple daily flights, trains, and buses available on this busy route.
+                    </div>
+                </div>
+                
+                <div class="route-card">
+                    <h3>Bangalore to Chennai</h3>
+                    <div class="route-price">From ₹899</div>
+                    <div class="route-description">
+                        Quick connections with frequent departures throughout the day.
+                    </div>
+                </div>
+                
+                <div class="route-card">
+                    <h3>Delhi to Jaipur</h3>
+                    <div class="route-price">From ₹499</div>
+                    <div class="route-description">
+                        Affordable bus options and comfortable train journeys available.
+                    </div>
+                </div>
+                
+                <div class="route-card">
+                    <h3>Hyderabad to Goa</h3>
+                    <div class="route-price">From ₹3,299</div>
+                    <div class="route-description">
+                        Direct flights and overnight buses for this popular vacation route.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Travel Tips Section -->
+        <section class="travel-tips">
+            <h2>Smart Ticket Booking Tips</h2>
+            <p>Make the most of your travel with these expert booking tips.</p>
+            
+            <div class="tips-grid">
+                <div class="tip-card">
+                    <div class="tip-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <h3 class="tip-title">Book Early</h3>
+                    <p class="tip-content">Flight and train tickets are usually cheaper when booked 6-8 weeks in advance.</p>
+                </div>
+                
+                <div class="tip-card">
+                    <div class="tip-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3 class="tip-title">Flexible Timing</h3>
+                    <p class="tip-content">Mid-week flights and late-night buses often offer better prices.</p>
+                </div>
+                
+                <div class="tip-card">
+                    <div class="tip-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <h3 class="tip-title">Set Alerts</h3>
+                    <p class="tip-content">Enable price alerts to get notified when fares drop on your preferred routes.</p>
+                </div>
+                
+                <div class="tip-card">
+                    <div class="tip-icon">
+                        <i class="fas fa-luggage-cart"></i>
+                    </div>
+                    <h3 class="tip-title">Check Baggage</h3>
+                    <p class="tip-content">Review baggage policies to avoid unexpected fees at the airport or bus station.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Booking Modal -->
+    <div class="modal-overlay" id="booking-modal">
+        <div class="booking-modal">
+            <div class="modal-close" id="modal-close">
+                <i class="fas fa-times"></i>
+            </div>
+            <div class="modal-header">
+                <h3>Complete Your Booking</h3>
+                <p>Enter your details to confirm your ticket</p>
+            </div>
+            
+            <div class="selected-ticket">
+                <div class="selected-ticket-header">
+                    <div class="selected-ticket-title" id="modal-ticket-name">Flight to Mumbai</div>
+                    <div class="selected-ticket-price" id="modal-ticket-price">₹5,499</div>
+                </div>
+                <div class="selected-ticket-dates" id="modal-ticket-dates">Nov 15, 2023 | 08:30 AM - 10:45 AM</div>
+            </div>
+            
+            <div class="passenger-info">
+                <h4><i class="fas fa-user"></i> Passenger Information</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="first-name">First Name</label>
+                        <input type="text" id="first-name" placeholder="Enter first name">
+                    </div>
+                    <div class="form-group">
+                        <label for="last-name">Last Name</label>
+                        <input type="text" id="last-name" placeholder="Enter last name">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="passenger-email">Email</label>
+                    <input type="email" id="passenger-email" placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="passenger-phone">Phone Number</label>
+                    <input type="tel" id="passenger-phone" placeholder="Enter your phone number">
+                </div>
+            </div>
+            
+            <div class="payment-methods">
+                <h4><i class="fas fa-credit-card"></i> Payment Method</h4>
+                <div class="payment-method active">
+                    <div class="payment-method-icon">
+                        <i class="far fa-credit-card"></i>
+                    </div>
+                    <div class="payment-method-details">
+                        <div class="payment-method-title">Credit/Debit Card</div>
+                        <div class="payment-method-description">Pay with Visa, Mastercard, or other cards</div>
+                    </div>
+                </div>
+                <div class="payment-method">
+                    <div class="payment-method-icon">
+                        <i class="fab fa-paypal"></i>
+                    </div>
+                    <div class="payment-method-details">
+                        <div class="payment-method-title">PayPal</div>
+                        <div class="payment-method-description">Pay with your PayPal account</div>
+                    </div>
+                </div>
+                <div class="payment-method">
+                    <div class="payment-method-icon">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <div class="payment-method-details">
+                        <div class="payment-method-title">UPI</div>
+                        <div class="payment-method-description">Pay using any UPI app</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="payment-form">
+                <div class="form-group">
+                    <label for="card-number">Card Number</label>
+                    <input type="text" id="card-number" placeholder="1234 5678 9012 3456">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="expiry-date">Expiry Date</label>
+                        <input type="text" id="expiry-date" placeholder="MM/YY">
+                    </div>
+                    <div class="form-group">
+                        <label for="cvv">CVV</label>
+                        <input type="text" id="cvv" placeholder="123">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="card-name">Name on Card</label>
+                    <input type="text" id="card-name" placeholder="Enter name as on card">
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn-outline" id="cancel-booking">Cancel</button>
+                <button class="btn-solid" id="confirm-booking">
+                    <i class="fas fa-lock"></i> Confirm Booking
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" id="confirmation-modal">
+        <div class="booking-modal confirmation-modal">
+            <div class="confirmation-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            <h3>Booking Confirmed!</h3>
+            <p>Your ticket has been successfully booked. A confirmation has been sent to your email.</p>
+            
+            <div class="confirmation-details">
+                <div class="confirmation-detail">
+                    <span class="confirmation-detail-label">Booking Reference:</span>
+                    <span class="confirmation-detail-value">SMTRP-2023-5874</span>
+                </div>
+                <div class="confirmation-detail">
+                    <span class="confirmation-detail-label">Ticket Type:</span>
+                    <span class="confirmation-detail-value" id="confirmation-type">Flight</span>
+                </div>
+                <div class="confirmation-detail">
+                    <span class="confirmation-detail-label">Route:</span>
+                    <span class="confirmation-detail-value" id="confirmation-route">Delhi to Mumbai</span>
+                </div>
+                <div class="confirmation-detail">
+                    <span class="confirmation-detail-label">Date & Time:</span>
+                    <span class="confirmation-detail-value" id="confirmation-datetime">Nov 15, 2023 | 08:30 AM</span>
+                </div>
+                <div class="confirmation-detail">
+                    <span class="confirmation-detail-label">Passengers:</span>
+                    <span class="confirmation-detail-value" id="confirmation-passengers">2</span>
+                </div>
+                <div class="confirmation-detail">
+                    <span class="confirmation-detail-label">Total Paid:</span>
+                    <span class="confirmation-detail-value" id="confirmation-total">₹10,998</span>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn-solid" id="done-button">
+                    <i class="fas fa-check"></i> Done
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile Menu Toggle
+            const hamburger = document.getElementById('hamburger');
+            const nav = document.getElementById('nav');
+            
+            hamburger.addEventListener('click', function() {
+                this.classList.toggle('open');
+                nav.classList.toggle('active');
+            });
+            
+            // Close mobile menu when clicking on a link
+            document.querySelectorAll('nav ul li a').forEach(link => {
+                link.addEventListener('click', () => {
+                    hamburger.classList.remove('open');
+                    nav.classList.remove('active');
+                });
+            });
+            
+            // Sticky Header
+            const header = document.getElementById('header');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+        
+            // Tab Switching
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Remove active class from all tabs and content
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked tab
+                    this.classList.add('active');
+                    
+                    // Show corresponding content
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
+            const sampleFlights = [
+            // Flights 1-50
+            {
+                id: 1,
+                provider: "IndiGo",
+                logo: "fas fa-plane",
+                from: "Delhi (DEL)",
+                to: "Mumbai (BOM)",
+                departure: "08:30 AM",
+                arrival: "10:45 AM",
+                date: "2023-11-15",
+                duration: "2h 15m",
+                price: 5499,
+                amenities: ["Free Meal", "20kg Baggage", "Entertainment"],
+                type: "Economy"
+            },
+            {
+                id: 2,
+                provider: "Air India",
+                logo: "fas fa-plane",
+                from: "Delhi (DEL)",
+                to: "Mumbai (BOM)",
+                departure: "11:15 AM",
+                arrival: "01:30 PM",
+                date: "2023-11-15",
+                duration: "2h 15m",
+                price: 6299,
+                amenities: ["Free Meal", "25kg Baggage", "Entertainment"],
+                type: "Economy"
+            },
+            {
+                id: 3,
+                provider: "Vistara",
+                logo: "fas fa-plane",
+                from: "Delhi (DEL)",
+                to: "Mumbai (BOM)",
+                departure: "03:45 PM",
+                arrival: "06:00 PM",
+                date: "2023-11-15",
+                duration: "2h 15m",
+                price: 7899,
+                amenities: ["Free Meal", "30kg Baggage", "Extra Legroom"],
+                type: "Premium Economy"
+            },
+            {
+                id: 4,
+                provider: "SpiceJet",
+                logo: "fas fa-plane",
+                from: "Delhi (DEL)",
+                to: "Bangalore (BLR)",
+                departure: "07:00 AM",
+                arrival: "09:45 AM",
+                date: "2023-11-15",
+                duration: "2h 45m",
+                price: 4899,
+                amenities: ["20kg Baggage", "Snack"],
+                type: "Economy"
+            },
+            {
+                id: 5,
+                provider: "GoAir",
+                logo: "fas fa-plane",
+                from: "Delhi (DEL)",
+                to: "Chennai (MAA)",
+                departure: "10:30 AM",
+                arrival: "01:15 PM",
+                date: "2023-11-15",
+                duration: "2h 45m",
+                price: 5299,
+                amenities: ["20kg Baggage"],
+                type: "Economy"
+            },
+            {
+                id: 6,
+                provider: "AirAsia",
+                logo: "fas fa-plane",
+                from: "Mumbai (BOM)",
+                to: "Goa (GOI)",
+                departure: "02:00 PM",
+                arrival: "03:00 PM",
+                date: "2023-11-15",
+                duration: "1h 0m",
+                price: 3499,
+                amenities: ["15kg Baggage"],
+                type: "Economy"
+            },
+            {
+                id: 7,
+                provider: "IndiGo",
+                logo: "fas fa-plane",
+                from: "Bangalore (BLR)",
+                to: "Hyderabad (HYD)",
+                departure: "04:30 PM",
+                arrival: "05:30 PM",
+                date: "2023-11-15",
+                duration: "1h 0m",
+                price: 2899,
+                amenities: ["20kg Baggage"],
+                type: "Economy"
+            },
+            {
+                id: 8,
+                provider: "Vistara",
+                logo: "fas fa-plane",
+                from: "Delhi (DEL)",
+                to: "Kolkata (CCU)",
+                departure: "06:00 PM",
+                arrival: "08:15 PM",
+                date: "2023-11-15",
+                duration: "2h 15m",
+                price: 6599,
+                amenities: ["Free Meal", "25kg Baggage", "Entertainment"],
+                type: "Premium Economy"
+            },
+            {
+                id: 9,
+                provider: "IndiGo",
+                logo: "fas fa-plane",
+                from: "Kolkata (CCU)",
+                to: "Bangalore (BLR)",
+                departure: "01:15 PM",
+                arrival: "04:00 PM",
+                date: "2023-11-16",
+                duration: "2h 45m",
+                price: 5799,
+                amenities: ["Free Meal", "20kg Baggage"],
+                type: "Economy"
+            },
+            {
+                id: 10,
+                provider: "Air India",
+                logo: "fas fa-plane",
+                from: "Hyderabad (HYD)",
+                to: "Chennai (MAA)",
+                departure: "03:30 PM",
+                arrival: "04:45 PM",
+                date: "2023-11-16",
+                duration: "1h 15m",
+                price: 3499,
+                amenities: ["15kg Baggage"],
+                type: "Economy"
+            },
+            // Flights 11-20
+            {
+                id: 11,
+                provider: "SpiceJet",
+                logo: "fas fa-plane",
+                from: "Mumbai (BOM)",
+                to: "Delhi (DEL)",
+                departure: "07:30 AM",
+                arrival: "09:45 AM",
+                date: "2023-11-16",
+                duration: "2h 15m",
+                price: 5199,
+                amenities: ["20kg Baggage"],
+                type: "Economy"
+            },
+            {
+                id: 12,
+                provider: "Vistara",
+                logo: "fas fa-plane",
+                from: "Bangalore (BLR)",
+                to: "Delhi (DEL)",
+                departure: "10:00 AM",
+                arrival: "12:45 PM",
+                date: "2023-11-16",
+                duration: "2h 45m",
+                price: 6899,
+                amenities: ["Free Meal", "25kg Baggage"],
+                type: "Premium Economy"
+            },
+            {
+                id: 13,
+                provider: "IndiGo",
+                logo: "fas fa-plane",
+                from: "Chennai (MAA)",
+                to: "Mumbai (BOM)",
+                departure: "01:45 PM",
+                arrival: "03:45 PM",
+                date: "2023-11-16",
+                duration: "2h 0m",
+                price: 4599,
+                amenities: ["20kg Baggage"],
+                type: "Economy"
+            },
+            {
+                id: 14,
+                provider: "AirAsia",
+                logo: "fas fa-plane",
+                from: "Goa (GOI)",
+                to: "Bangalore (BLR)",
+                departure: "04:15 PM",
+                arrival: "05:30 PM",
+                date: "2023-11-16",
+                duration: "1h 15m",
+                price: 3299,
+                amenities: ["15kg Baggage"],
+                type: "Economy"
+            },
+            {
+                id: 15,
+                provider: "GoAir",
+                logo: "fas fa-plane",
+                from: "Hyderabad (HYD)",
+                to: "Delhi (DEL)",
+                departure: "06:30 PM",
+                arrival: "08:45 PM",
+                date: "2023-11-16",
+                duration: "2h 15m",
+                price: 4999,
+                amenities: ["20kg Baggage"],
+                type: "Economy"
+            },
+            {
+                id: 16,
+                provider: "Vistara",
+                logo: "fas fa-plane",
+                from: "Kolkata (CCU)",
+                to: "Mumbai (BOM)",
+                departure: "09:00 PM",
+                arrival: "11:30 PM",
+                date: "2023-11-16",
+                duration: "2h 30m",
+                price: 7199,
+                amenities: ["Free Meal", "30kg Baggage"],
+                type: "Business"
+            },
+            {
+                id: 17,
+                provider: "Air India",
+                logo: "fas fa-plane",
+                from: "Delhi (DEL)",
+                to: "Pune (PNQ)",
+                departure: "08:15 AM",
+                arrival: "10:00 AM",
+                date: "2023-11-17",
+                duration: "1h 45m",
+                price: 4299,
+                amenities: ["20kg Baggage"],
+                type: "Economy"
+            },
+            {
+                id: 18,
+                provider: "IndiGo",
+                logo: "fas fa-plane",
+                from: "Bangalore (BLR)",
+                to: "Goa (GOI)",
+                departure: "11:30 AM",
+                arrival: "12:45 PM",
+                date: "2023-11-17",
+                duration: "1h 15m",
+                price: 3699,
+                amenities: ["20kg Baggage"],
+                type: "Economy"
+            },
+            {
+                id: 19,
+                provider: "SpiceJet",
+                logo: "fas fa-plane",
+                from: "Mumbai (BOM)",
+                to: "Hyderabad (HYD)",
+                departure: "02:45 PM",
+                arrival: "04:15 PM",
+                date: "2023-11-17",
+                duration: "1h 30m",
+                price: 3899,
+                amenities: ["20kg Baggage"],
+                type: "Economy"
+            },
+            {
+                id: 20,
+                provider: "Vistara",
+                logo: "fas fa-plane",
+                from: "Chennai (MAA)",
+                to: "Delhi (DEL)",
+                departure: "05:30 PM",
+                arrival: "08:15 PM",
+                date: "2023-11-17",
+                duration: "2h 45m",
+                price: 7499,
+                amenities: ["Free Meal", "30kg Baggage"],
+                type: "Premium Economy"
+            },
+            // Flights 21-30
+            {
+                id: 21,
+                provider: "IndiGo",
+                logo: "fas fa-plane",
+                from: "Pune (PNQ)",
+                to: "Bangalore (BLR)",
+                departure: "07:45 AM",
+                arrival: "09:15 AM",
+                date: "2023-11-18",
+                duration: "1h 30m",
+                price: 3499,
+                amenities: ["20kg Baggage"],
+                type: "Economy"
+            },
+            {
+                id: 22,
+                provider: "Air India",
+                logo: "fas fa-plane",
+                from: "Goa (GOI)",
+                to: "Mumbai (BOM)",
+                departure: "10:30 AM",
+                arrival: "11:30 AM",
+                date: "2023-11-18",
+                duration: "1h 0m",
+                price: 3199,
+                amenities: ["15kg Baggage"],
+                type: "Economy"
+            },
+            {
+                id: 23,
+                provider: "SpiceJet",
+                logo: "fas fa-plane",
+                from: "Hyderabad (HYD)",
+                to: "Bangalore (BLR)",
+                departure: "01:15 PM",
+                arrival: "02:30 PM",
+                date: "2023-11-18",
+                duration: "1h 15m",
+                price: 2999,
+                amenities: ["20kg Baggage"],
+                type: "Economy"
+            },
+            {
+                id: 24,
+                provider: "Vistara",
+                logo: "fas fa-plane",
+                from: "Delhi (DEL)",
+                to: "Ahmedabad (AMD)",
+                departure: "04:00 PM",
+                arrival: "05:30 PM",
+                date: "2023-11-18",
+                duration: "1h 30m",
+                price: 4599,
+                amenities: ["Free Meal", "25kg Baggage"],
+                type: "Premium Economy"
+            },
+            {
+                id: 25,
+                provider: "IndiGo",
+                logo: "fas fa-plane",
+                from: "Mumbai (BOM)",
+                to: "Kolkata (CCU)",
+                departure: "06:45 PM",
+                arrival: "09:15 PM",
+                date: "2023-11-18",
+                duration: "2h 30m",
+                price: 5399,
+                amenities: ["20kg Baggage"],
+                type: "Economy"
+            },
+            {
+                id: 26,
+                provider: "AirAsia",
+                logo: "fas fa-plane",
+                from: "Bangalore (BLR)",
+                to: "Chennai (MAA)",
+                departure: "09:30 PM",
+                arrival: "10:45 PM",
+                date: "2023-11-18",
+                duration: "1h 15m",
+                price: 2799,
+                amenities: ["15kg Baggage"],
+                type: "Economy"
+            },
+            {
+                id: 27,
+                provider: "GoAir",
+                logo: "fas fa-plane",
+                from: "Delhi (DEL)",
+                to: "Jaipur (JAI)",
+                departure: "08:00 AM",
+                arrival: "09:00 AM",
+                date: "2023-11-19",
+                duration: "1h 0m",
+                price: 2999,
+                amenities: ["15kg Baggage"],
+                type: "Economy"
+            },
+            {
+                id: 28,
+                provider: "Vistara",
+                logo: "fas fa-plane",
+                from: "Mumbai (BOM)",
+                to: "Delhi (DEL)",
+                departure: "11:15 AM",
+                arrival: "01:30 PM",
+                date: "2023-11-19",
+                duration: "2h 15m",
+                price: 7699,
+                amenities: ["Free Meal", "30kg Baggage"],
+                type: "Business"
+            },
+            {
+                id: 29,
+                provider: "IndiGo",
+                logo: "fas fa-plane",
+                from: "Chennai (MAA)",
+                to: "Hyderabad (HYD)",
+                departure: "02:30 PM",
+                arrival: "03:45 PM",
+                date: "2023-11-19",
+                duration: "1h 15m",
+                price: 3099,
+                amenities: ["20kg Baggage"],
+                type: "Economy"
+            },
+            {
+                id: 30,
+                provider: "Air India",
+                logo: "fas fa-plane",
+                from: "Bangalore (BLR)",
+                to: "Goa (GOI)",
+                departure: "05:45 PM",
+                arrival: "07:00 PM",
+                date: "2023-11-19",
+                duration: "1h 15m",
+                price: 3899,
+                amenities: ["20kg Baggage"],
+                type: "Economy"
+            },
+            // Flights 31-40
+            {
+                id: 31,
+                provider: "SpiceJet",
+                logo: "fas fa-plane",
+                from: "Delhi (DEL)",
+                to: "Lucknow (LKO)",
+                departure: "07:30 AM",
+                arrival: "08:30 AM",
+                date: "2023-11-20",
+                duration: "1h 0m",
+                price: 2599,
+                amenities: ["15kg Baggage"],
+                type: "Economy"
+            },
+            {
+                id: 32,
+                provider: "Vistara",
+                logo: "fas fa-plane",
+                from: "Mumbai (BOM)",
+                to: "Chennai (MAA)",
+                departure: "10:00 AM",
+                arrival: "12:00 PM",
+                date: "2023-11-20",
+                duration: "2h 0m",
+                price: 6899,
+                amenities: ["Free Meal", "25kg Baggage"],
+                type: "Premium Economy"
+            },
+            {
+                id: 33,
+                provider: "IndiGo",
+                logo: "fas fa-plane",
+                from: "Hyderabad (HYD)",
+                to: "Pune (PNQ)",
+                departure: "01:15 PM",
+                arrival: "02:30 PM",
+                date: "2023-11-20",
+                duration: "1h 15m",
+                price: 3299,
+                amenities: ["20kg Baggage"],
+                type: "Economy"
+            },
+            {
+                id: 34,
+                provider: "AirAsia",
+                logo: "fas fa-plane",
+                from: "Goa (GOI)",
+                to: "Delhi (DEL)",
+                departure: "04:30 PM",
+                arrival: "07:00 PM",
+                date: "2023-11-20",
+                duration: "2h 30m",
+                price: 4599,
+                amenities: ["20kg Baggage"],
+                type: "Economy"
+            },
+            {
+                id: 35,
+                provider: "GoAir",
+                logo: "fas fa-plane",
+                from: "Bangalore (BLR)",
+                to: "Kolkata (CCU)",
+                departure: "07:45 PM",
+                arrival: "10:15 PM",
+                date: "2023-11-20",
+                duration: "2h 30m",
+                price: 4999,
+                amenities: ["20kg Baggage"],
+                type: "Economy"
+            },
+            {
+                id: 36,
+                provider: "Vistara",
+                logo: "fas fa-plane",
+                from: "Delhi (DEL)",
+                to: "Hyderabad (HYD)",
+                departure: "09:30 PM",
+                arrival: "11:30 PM",
+                date: "2023-11-20",
+                duration: "2h 0m",
+                price: 6599,
+                amenities: ["Free Meal", "25kg Baggage"],
+                type: "Premium Economy"
+            },
+            {
+                id: 37,
+                provider: "IndiGo",
+                logo: "fas fa-plane",
+                from: "Mumbai (BOM)",
+                to: "Pune (PNQ)",
+                departure: "08:00 AM",
+                arrival: "08:45 AM",
+                date: "2023-11-21",
+                duration: "45m",
+                price: 2499,
+                amenities: ["15kg Baggage"],
+                type: "Economy"
+            },
+            {
+                id: 38,
+                provider: "Air India",
+                logo: "fas fa-plane",
+                from: "Chennai (MAA)",
+                to: "Bangalore (BLR)",
+                departure: "11:15 AM",
+                arrival: "12:30 PM",
+                date: "2023-11-21",
+                duration: "1h 15m",
+                price: 2799,
+                amenities: ["15kg Baggage"],
+                type: "Economy"
+            },
+            {
+                id: 39,
+                provider: "SpiceJet",
+                logo: "fas fa-plane",
+                from: "Delhi (DEL)",
+                to: "Goa (GOI)",
+                departure: "02:30 PM",
+                arrival: "05:00 PM",
+                date: "2023-11-21",
+                duration: "2h 30m",
+                price: 5199,
+                amenities: ["20kg Baggage"],
+                type: "Economy"
+            },
+            {
+                id: 40,
+                provider: "Vistara",
+                logo: "fas fa-plane",
+                from: "Hyderabad (HYD)",
+                to: "Mumbai (BOM)",
+                departure: "05:45 PM",
+                arrival: "07:15 PM",
+                date: "2023-11-21",
+                duration: "1h 30m",
+                price: 5899,
+                amenities: ["Free Meal", "25kg Baggage"],
+                type: "Premium Economy"
+            },
+            // Flights 41-50
+            {
+                id: 41,
+                provider: "IndiGo",
+                logo: "fas fa-plane",
+                from: "Bangalore (BLR)",
+                to: "Delhi (DEL)",
+                departure: "08:30 PM",
+                arrival: "11:15 PM",
+                date: "2023-11-21",
+                duration: "2h 45m",
+                price: 5299,
+                amenities: ["20kg Baggage"],
+                type: "Economy"
+            },
+            {
+                id: 42,
+                provider: "AirAsia",
+                logo: "fas fa-plane",
+                from: "Mumbai (BOM)",
+                to: "Ahmedabad (AMD)",
+                departure: "07:00 AM",
+                arrival: "08:00 AM",
+                date: "2023-11-22",
+                duration: "1h 0m",
+                price: 2899,
+                amenities: ["15kg Baggage"],
+                type: "Economy"
+            },
+            {
+                id: 43,
+                provider: "GoAir",
+                logo: "fas fa-plane",
+                from: "Delhi (DEL)",
+                to: "Pune (PNQ)",
+                departure: "10:15 AM",
+                arrival: "12:00 PM",
+                date: "2023-11-22",
+                duration: "1h 45m",
+                price: 3499,
+                amenities: ["20kg Baggage"],
+                type: "Economy"
+            },
+            {
+                id: 44,
+                provider: "Vistara",
+                logo: "fas fa-plane",
+                from: "Chennai (MAA)",
+                to: "Kolkata (CCU)",
+                departure: "01:30 PM",
+                arrival: "03:45 PM",
+                date: "2023-11-22",
+                duration: "2h 15m",
+                price: 6199,
+                amenities: ["Free Meal", "25kg Baggage"],
+                type: "Premium Economy"
+            },
+            {
+                id: 45,
+                provider: "IndiGo",
+                logo: "fas fa-plane",
+                from: "Hyderabad (HYD)",
+                to: "Bangalore (BLR)",
+                departure: "04:45 PM",
+                arrival: "06:00 PM",
+                date: "2023-11-22",
+                duration: "1h 15m",
+                price: 2999,
+                amenities: ["20kg Baggage"],
+                type: "Economy"
+            },
+            {
+                id: 46,
+                provider: "Air India",
+                logo: "fas fa-plane",
+                from: "Goa (GOI)",
+                to: "Chennai (MAA)",
+                departure: "07:30 PM",
+                arrival: "09:00 PM",
+                date: "2023-11-22",
+                duration: "1h 30m",
+                price: 4099,
+                amenities: ["20kg Baggage"],
+                type: "Economy"
+            },
+            {
+                id: 47,
+                provider: "SpiceJet",
+                logo: "fas fa-plane",
+                from: "Delhi (DEL)",
+                to: "Kolkata (CCU)",
+                departure: "09:45 PM",
+                arrival: "12:00 AM",
+                date: "2023-11-22",
+                duration: "2h 15m",
+                price: 4699,
+                amenities: ["20kg Baggage"],
+                type: "Economy"
+            },
+            {
+                id: 48,
+                provider: "Vistara",
+                logo: "fas fa-plane",
+                from: "Mumbai (BOM)",
+                to: "Hyderabad (HYD)",
+                departure: "08:00 AM",
+                arrival: "09:30 AM",
+                date: "2023-11-23",
+                duration: "1h 30m",
+                price: 5499,
+                amenities: ["Free Meal", "25kg Baggage"],
+                type: "Premium Economy"
+            },
+            {
+                id: 49,
+                provider: "IndiGo",
+                logo: "fas fa-plane",
+                from: "Bangalore (BLR)",
+                to: "Pune (PNQ)",
+                departure: "11:15 AM",
+                arrival: "12:30 PM",
+                date: "2023-11-23",
+                duration: "1h 15m",
+                price: 2799,
+                amenities: ["15kg Baggage"],
+                type: "Economy"
+            },
+            {
+                id: 50,
+                provider: "AirAsia",
+                logo: "fas fa-plane",
+                from: "Chennai (MAA)",
+                to: "Delhi (DEL)",
+                departure: "02:30 PM",
+                arrival: "05:15 PM",
+                date: "2023-11-23",
+                duration: "2h 45m",
+                price: 4399,
+                amenities: ["20kg Baggage"],
+                type: "Economy"
+            }
+        ];
+        
+        const sampleTrains = [
+            // Trains 51-100
+            {
+                id: 51,
+                provider: "Rajdhani Express",
+                logo: "fas fa-train",
+                from: "Delhi (NDLS)",
+                to: "Mumbai (CSTM)",
+                departure: "04:30 PM",
+                arrival: "08:30 AM",
+                date: "2023-11-15",
+                duration: "16h 0m",
+                price: 2499,
+                amenities: ["Meals Included", "Bedding", "AC"],
+                type: "3A"
+            },
+            {
+                id: 52,
+                provider: "Shatabdi Express",
+                logo: "fas fa-train",
+                from: "Delhi (NDLS)",
+                to: "Mumbai (CSTM)",
+                departure: "06:00 AM",
+                arrival: "11:00 PM",
+                date: "2023-11-15",
+                duration: "17h 0m",
+                price: 1899,
+                amenities: ["Meals Included", "Chair Car", "AC"],
+                type: "CC"
+            },
+            {
+                id: 53,
+                provider: "Duronto Express",
+                logo: "fas fa-train",
+                from: "Delhi (NDLS)",
+                to: "Bangalore (SBC)",
+                departure: "08:00 PM",
+                arrival: "06:00 AM",
+                date: "2023-11-16",
+                duration: "22h 0m",
+                price: 2799,
+                amenities: ["Meals Included", "Bedding", "AC"],
+                type: "2A"
+            },
+            {
+                id: 54,
+                provider: "Garib Rath",
+                logo: "fas fa-train",
+                from: "Mumbai (CSTM)",
+                to: "Chennai (MAS)",
+                departure: "07:30 PM",
+                arrival: "03:30 PM",
+                date: "2023-11-16",
+                duration: "20h 0m",
+                price: 1599,
+                amenities: ["AC"],
+                type: "3A"
+            },
+            {
+                id: 55,
+                provider: "Sampark Kranti",
+                logo: "fas fa-train",
+                from: "Delhi (NDLS)",
+                to: "Ahmedabad (ADI)",
+                departure: "05:45 PM",
+                arrival: "02:30 AM",
+                date: "2023-11-15",
+                duration: "8h 45m",
+                price: 1299,
+                amenities: ["AC"],
+                type: "SL"
+            },
+            {
+                id: 56,
+                provider: "Shatabdi Express",
+                logo: "fas fa-train",
+                from: "Chennai (MAS)",
+                to: "Bangalore (SBC)",
+                departure: "06:00 AM",
+                arrival: "11:00 AM",
+                date: "2023-11-16",
+                duration: "5h 0m",
+                price: 899,
+                amenities: ["Breakfast", "AC"],
+                type: "CC"
+            },
+            {
+                id: 57,
+                provider: "Jan Shatabdi",
+                logo: "fas fa-train",
+                from: "Mumbai (CSTM)",
+                to: "Goa (MAO)",
+                departure: "01:30 PM",
+                arrival: "10:30 PM",
+                date: "2023-11-16",
+                duration: "9h 0m",
+                price: 799,
+                amenities: ["AC"],
+                type: "SL"
+            },
+            {
+                id: 58,
+                provider: "Humsafar Express",
+                logo: "fas fa-train",
+                from: "Delhi (NDLS)",
+                to: "Jaipur (JP)",
+                departure: "10:15 PM",
+                arrival: "04:30 AM",
+                date: "2023-11-16",
+                duration: "6h 15m",
+                price: 1099,
+                amenities: ["AC", "Bedding"],
+                type: "3A"
+            },
+            {
+                id: 59,
+                provider: "Rajdhani Express",
+                logo: "fas fa-train",
+                from: "Mumbai (CSTM)",
+                to: "Delhi (NDLS)",
+                departure: "04:30 PM",
+                arrival: "08:30 AM",
+                date: "2023-11-16",
+                duration: "16h 0m",
+                price: 2599,
+                amenities: ["Meals Included", "Bedding", "AC"],
+                type: "3A"
+            },
+            {
+                id: 60,
+                provider: "Shatabdi Express",
+                logo: "fas fa-train",
+                from: "Bangalore (SBC)",
+                to: "Chennai (MAS)",
+                departure: "06:00 AM",
+                arrival: "11:00 AM",
+                date: "2023-11-17",
+                duration: "5h 0m",
+                price: 899,
+                amenities: ["Breakfast", "AC"],
+                type: "CC"
+            },
+            // Trains 61-70
+            {
+                id: 61,
+                provider: "Duronto Express",
+                logo: "fas fa-train",
+                from: "Mumbai (CSTM)",
+                to: "Ahmedabad (ADI)",
+                departure: "08:30 PM",
+                arrival: "05:30 AM",
+                date: "2023-11-17",
+                duration: "9h 0m",
+                price: 1799,
+                amenities: ["Meals Included", "Bedding", "AC"],
+                type: "2A"
+            },
+            {
+                id: 62,
+                provider: "Garib Rath",
+                logo: "fas fa-train",
+                from: "Delhi (NDLS)",
+                to: "Jaipur (JP)",
+                departure: "07:30 PM",
+                arrival: "11:30 PM",
+                date: "2023-11-17",
+                duration: "4h 0m",
+                price: 999,
+                amenities: ["AC"],
+                type: "3A"
+            },
+            {
+                id: 63,
+                provider: "Sampark Kranti",
+                logo: "fas fa-train",
+                from: "Chennai (MAS)",
+                to: "Hyderabad (HYB)",
+                departure: "05:45 PM",
+                arrival: "06:30 AM",
+                date: "2023-11-18",
+                duration: "12h 45m",
+                price: 1499,
+                amenities: ["AC"],
+                type: "SL"
+            },
+            {
+                id: 64,
+                provider: "Shatabdi Express",
+                logo: "fas fa-train",
+                from: "Delhi (NDLS)",
+                to: "Chandigarh (CDG)",
+                departure: "07:15 AM",
+                arrival: "11:30 AM",
+                date: "2023-11-18",
+                duration: "4h 15m",
+                price: 1099,
+                amenities: ["Breakfast", "AC"],
+                type: "CC"
+            },
+            {
+                id: 65,
+                provider: "Jan Shatabdi",
+                logo: "fas fa-train",
+                from: "Bangalore (SBC)",
+                to: "Goa (MAO)",
+                departure: "01:30 PM",
+                arrival: "10:30 PM",
+                date: "2023-11-18",
+                duration: "9h 0m",
+                price: 899,
+                amenities: ["AC"],
+                type: "SL"
+            },
+            {
+                id: 66,
+                provider: "Humsafar Express",
+                logo: "fas fa-train",
+                from: "Mumbai (CSTM)",
+                to: "Delhi (NDLS)",
+                departure: "10:15 PM",
+                arrival: "04:30 PM",
+                date: "2023-11-19",
+                duration: "18h 15m",
+                price: 1999,
+                amenities: ["AC", "Bedding"],
+                type: "3A"
+            },
+            {
+                id: 67,
+                provider: "Rajdhani Express",
+                logo: "fas fa-train",
+                from: "Delhi (NDLS)",
+                to: "Kolkata (HWH)",
+                departure: "04:30 PM",
+                arrival: "10:30 AM",
+                date: "2023-11-19",
+                duration: "18h 0m",
+                price: 2899,
+                amenities: ["Meals Included", "Bedding", "AC"],
+                type: "2A"
+            },
+            {
+                id: 68,
+                provider: "Shatabdi Express",
+                logo: "fas fa-train",
+                from: "Hyderabad (HYB)",
+                to: "Chennai (MAS)",
+                departure: "06:00 AM",
+                arrival: "01:30 PM",
+                date: "2023-11-20",
+                duration: "7h 30m",
+                price: 1299,
+                amenities: ["Breakfast", "AC"],
+                type: "CC"
+            },
+            {
+                id: 69,
+                provider: "Duronto Express",
+                logo: "fas fa-train",
+                from: "Ahmedabad (ADI)",
+                to: "Mumbai (CSTM)",
+                departure: "08:30 PM",
+                arrival: "05:30 AM",
+                date: "2023-11-20",
+                duration: "9h 0m",
+                price: 1699,
+                amenities: ["Meals Included", "Bedding", "AC"],
+                type: "2A"
+            },
+            {
+                id: 70,
+                provider: "Garib Rath",
+                logo: "fas fa-train",
+                from: "Jaipur (JP)",
+                to: "Delhi (NDLS)",
+                departure: "07:30 PM",
+                arrival: "11:30 PM",
+                date: "2023-11-20",
+                duration: "4h 0m",
+                price: 949,
+                amenities: ["AC"],
+                type: "3A"
+            },
+            // Trains 71-80
+            {
+                id: 71,
+                provider: "Sampark Kranti",
+                logo: "fas fa-train",
+                from: "Hyderabad (HYB)",
+                to: "Bangalore (SBC)",
+                departure: "05:45 PM",
+                arrival: "06:30 AM",
+                date: "2023-11-21",
+                duration: "12h 45m",
+                price: 1399,
+                amenities: ["AC"],
+                type: "SL"
+            },
+            {
+                id: 72,
+                provider: "Shatabdi Express",
+                logo: "fas fa-train",
+                from: "Chandigarh (CDG)",
+                to: "Delhi (NDLS)",
+                departure: "07:15 AM",
+                arrival: "11:30 AM",
+                date: "2023-11-21",
+                duration: "4h 15m",
+                price: 1049,
+                amenities: ["Breakfast", "AC"],
+                type: "CC"
+            },
+            {
+                id: 73,
+                provider: "Jan Shatabdi",
+                logo: "fas fa-train",
+                from: "Goa (MAO)",
+                to: "Bangalore (SBC)",
+                departure: "01:30 PM",
+                arrival: "10:30 PM",
+                date: "2023-11-21",
+                duration: "9h 0m",
+                price: 849,
+                amenities: ["AC"],
+                type: "SL"
+            },
+            {
+                id: 74,
+                provider: "Humsafar Express",
+                logo: "fas fa-train",
+                from: "Delhi (NDLS)",
+                to: "Mumbai (CSTM)",
+                departure: "10:15 PM",
+                arrival: "04:30 PM",
+                date: "2023-11-22",
+                duration: "18h 15m",
+                price: 1899,
+                amenities: ["AC", "Bedding"],
+                type: "3A"
+            },
+            {
+                id: 75,
+                provider: "Rajdhani Express",
+                logo: "fas fa-train",
+                from: "Kolkata (HWH)",
+                to: "Delhi (NDLS)",
+                departure: "04:30 PM",
+                arrival: "10:30 AM",
+                date: "2023-11-22",
+                duration: "18h 0m",
+                price: 2799,
+                amenities: ["Meals Included", "Bedding", "AC"],
+                type: "2A"
+            },
+            {
+                id: 76,
+                provider: "Shatabdi Express",
+                logo: "fas fa-train",
+                from: "Chennai (MAS)",
+                to: "Hyderabad (HYB)",
+                departure: "06:00 AM",
+                arrival: "01:30 PM",
+                date: "2023-11-23",
+                duration: "7h 30m",
+                price: 1249,
+                amenities: ["Breakfast", "AC"],
+                type: "CC"
+            },
+            {
+                id: 77,
+                provider: "Duronto Express",
+                logo: "fas fa-train",
+                from: "Mumbai (CSTM)",
+                to: "Ahmedabad (ADI)",
+                departure: "08:30 PM",
+                arrival: "05:30 AM",
+                date: "2023-11-23",
+                duration: "9h 0m",
+                price: 1749,
+                amenities: ["Meals Included", "Bedding", "AC"],
+                type: "2A"
+            },
+            {
+                id: 78,
+                provider: "Garib Rath",
+                logo: "fas fa-train",
+                from: "Delhi (NDLS)",
+                to: "Jaipur (JP)",
+                departure: "07:30 PM",
+                arrival: "11:30 PM",
+                date: "2023-11-23",
+                duration: "4h 0m",
+                price: 999,
+                amenities: ["AC"],
+                type: "3A"
+            },
+            {
+                id: 79,
+                provider: "Sampark Kranti",
+                logo: "fas fa-train",
+                from: "Bangalore (SBC)",
+                to: "Hyderabad (HYB)",
+                departure: "05:45 PM",
+                arrival: "06:30 AM",
+                date: "2023-11-24",
+                duration: "12h 45m",
+                price: 1449,
+                amenities: ["AC"],
+                type: "SL"
+            },
+            {
+                id: 80,
+                provider: "Shatabdi Express",
+                logo: "fas fa-train",
+                from: "Delhi (NDLS)",
+                to: "Chandigarh (CDG)",
+                departure: "07:15 AM",
+                arrival: "11:30 AM",
+                date: "2023-11-24",
+                duration: "4h 15m",
+                price: 1099,
+                amenities: ["Breakfast", "AC"],
+                type: "CC"
+            },
+            // Trains 81-90
+            {
+                id: 81,
+                provider: "Jan Shatabdi",
+                logo: "fas fa-train",
+                from: "Bangalore (SBC)",
+                to: "Goa (MAO)",
+                departure: "01:30 PM",
+                arrival: "10:30 PM",
+                date: "2023-11-24",
+                duration: "9h 0m",
+                price: 899,
+                amenities: ["AC"],
+                type: "SL"
+            },
+            {
+                id: 82,
+                provider: "Humsafar Express",
+                logo: "fas fa-train",
+                from: "Mumbai (CSTM)",
+                to: "Delhi (NDLS)",
+                departure: "10:15 PM",
+                arrival: "04:30 PM",
+                date: "2023-11-25",
+                duration: "18h 15m",
+                price: 1999,
+                amenities: ["AC", "Bedding"],
+                type: "3A"
+            },
+            {
+                id: 83,
+                provider: "Rajdhani Express",
+                logo: "fas fa-train",
+                from: "Delhi (NDLS)",
+                to: "Kolkata (HWH)",
+                departure: "04:30 PM",
+                arrival: "10:30 AM",
+                date: "2023-11-25",
+                duration: "18h 0m",
+                price: 2899,
+                amenities: ["Meals Included", "Bedding", "AC"],
+                type: "2A"
+            },
+            {
+                id: 84,
+                provider: "Shatabdi Express",
+                logo: "fas fa-train",
+                from: "Hyderabad (HYB)",
+                to: "Chennai (MAS)",
+                departure: "06:00 AM",
+                arrival: "01:30 PM",
+                date: "2023-11-26",
+                duration: "7h 30m",
+                price: 1299,
+                amenities: ["Breakfast", "AC"],
+                type: "CC"
+            },
+            {
+                id: 85,
+                provider: "Duronto Express",
+                logo: "fas fa-train",
+                from: "Ahmedabad (ADI)",
+                to: "Mumbai (CSTM)",
+                departure: "08:30 PM",
+                arrival: "05:30 AM",
+                date: "2023-11-26",
+                duration: "9h 0m",
+                price: 1699,
+                amenities: ["Meals Included", "Bedding", "AC"],
+                type: "2A"
+            },
+            {
+                id: 86,
+                provider: "Garib Rath",
+                logo: "fas fa-train",
+                from: "Jaipur (JP)",
+                to: "Delhi (NDLS)",
+                departure: "07:30 PM",
+                arrival: "11:30 PM",
+                date: "2023-11-26",
+                duration: "4h 0m",
+                price: 949,
+                amenities: ["AC"],
+                type: "3A"
+            },
+            {
+                id: 87,
+                provider: "Sampark Kranti",
+                logo: "fas fa-train",
+                from: "Hyderabad (HYB)",
+                to: "Bangalore (SBC)",
+                departure: "05:45 PM",
+                arrival: "06:30 AM",
+                date: "2023-11-27",
+                duration: "12h 45m",
+                price: 1399,
+                amenities: ["AC"],
+                type: "SL"
+            },
+            {
+                id: 88,
+                provider: "Shatabdi Express",
+                logo: "fas fa-train",
+                from: "Chandigarh (CDG)",
+                to: "Delhi (NDLS)",
+                departure: "07:15 AM",
+                arrival: "11:30 AM",
+                date: "2023-11-27",
+                duration: "4h 15m",
+                price: 1049,
+                amenities: ["Breakfast", "AC"],
+                type: "CC"
+            },
+            {
+                id: 89,
+                provider: "Jan Shatabdi",
+                logo: "fas fa-train",
+                from: "Goa (MAO)",
+                to: "Bangalore (SBC)",
+                departure: "01:30 PM",
+                arrival: "10:30 PM",
+                date: "2023-11-27",
+                duration: "9h 0m",
+                price: 849,
+                amenities: ["AC"],
+                type: "SL"
+            },
+            {
+                id: 90,
+                provider: "Humsafar Express",
+                logo: "fas fa-train",
+                from: "Delhi (NDLS)",
+                to: "Mumbai (CSTM)",
+                departure: "10:15 PM",
+                arrival: "04:30 PM",
+                date: "2023-11-28",
+                duration: "18h 15m",
+                price: 1899,
+                amenities: ["AC", "Bedding"],
+                type: "3A"
+            },
+            // Trains 91-100
+            {
+                id: 91,
+                provider: "Rajdhani Express",
+                logo: "fas fa-train",
+                from: "Kolkata (HWH)",
+                to: "Delhi (NDLS)",
+                departure: "04:30 PM",
+                arrival: "10:30 AM",
+                date: "2023-11-28",
+                duration: "18h 0m",
+                price: 2799,
+                amenities: ["Meals Included", "Bedding", "AC"],
+                type: "2A"
+            },
+            {
+                id: 92,
+                provider: "Shatabdi Express",
+                logo: "fas fa-train",
+                from: "Chennai (MAS)",
+                to: "Hyderabad (HYB)",
+                departure: "06:00 AM",
+                arrival: "01:30 PM",
+                date: "2023-11-29",
+                duration: "7h 30m",
+                price: 1249,
+                amenities: ["Breakfast", "AC"],
+                type: "CC"
+            },
+            {
+                id: 93,
+                provider: "Duronto Express",
+                logo: "fas fa-train",
+                from: "Mumbai (CSTM)",
+                to: "Ahmedabad (ADI)",
+                departure: "08:30 PM",
+                arrival: "05:30 AM",
+                date: "2023-11-29",
+                duration: "9h 0m",
+                price: 1749,
+                amenities: ["Meals Included", "Bedding", "AC"],
+                type: "2A"
+            },
+            {
+                id: 94,
+                provider: "Garib Rath",
+                logo: "fas fa-train",
+                from: "Delhi (NDLS)",
+                to: "Jaipur (JP)",
+                departure: "07:30 PM",
+                arrival: "11:30 PM",
+                date: "2023-11-29",
+                duration: "4h 0m",
+                price: 999,
+                amenities: ["AC"],
+                type: "3A"
+            },
+            {
+                id: 95,
+                provider: "Sampark Kranti",
+                logo: "fas fa-train",
+                from: "Bangalore (SBC)",
+                to: "Hyderabad (HYB)",
+                departure: "05:45 PM",
+                arrival: "06:30 AM",
+                date: "2023-11-30",
+                duration: "12h 45m",
+                price: 1449,
+                amenities: ["AC"],
+                type: "SL"
+            },
+            {
+                id: 96,
+                provider: "Shatabdi Express",
+                logo: "fas fa-train",
+                from: "Delhi (NDLS)",
+                to: "Chandigarh (CDG)",
+                departure: "07:15 AM",
+                arrival: "11:30 AM",
+                date: "2023-11-30",
+                duration: "4h 15m",
+                price: 1099,
+                amenities: ["Breakfast", "AC"],
+                type: "CC"
+            },
+            {
+                id: 97,
+                provider: "Jan Shatabdi",
+                logo: "fas fa-train",
+                from: "Bangalore (SBC)",
+                to: "Goa (MAO)",
+                departure: "01:30 PM",
+                arrival: "10:30 PM",
+                date: "2023-11-30",
+                duration: "9h 0m",
+                price: 899,
+                amenities: ["AC"],
+                type: "SL"
+            },
+            {
+                id: 98,
+                provider: "Humsafar Express",
+                logo: "fas fa-train",
+                from: "Mumbai (CSTM)",
+                to: "Delhi (NDLS)",
+                departure: "10:15 PM",
+                arrival: "04:30 PM",
+                date: "2023-12-01",
+                duration: "18h 15m",
+                price: 1999,
+                amenities: ["AC", "Bedding"],
+                type: "3A"
+            },
+            {
+                id: 99,
+                provider: "Rajdhani Express",
+                logo: "fas fa-train",
+                from: "Delhi (NDLS)",
+                to: "Kolkata (HWH)",
+                departure: "04:30 PM",
+                arrival: "10:30 AM",
+                date: "2023-12-01",
+                duration: "18h 0m",
+                price: 2899,
+                amenities: ["Meals Included", "Bedding", "AC"],
+                type: "2A"
+            },
+            {
+                id: 100,
+                provider: "Shatabdi Express",
+                logo: "fas fa-train",
+                from: "Hyderabad (HYB)",
+                to: "Chennai (MAS)",
+                departure: "06:00 AM",
+                arrival: "01:30 PM",
+                date: "2023-12-02",
+                duration: "7h 30m",
+                price: 1299,
+                amenities: ["Breakfast", "AC"],
+                type: "CC"
+            }
+        ];
+        
+        const sampleBuses = [
+            // Buses 101-150
+            {
+                id: 101,
+                provider: "Volvo Travels",
+                logo: "fas fa-bus",
+                from: "Delhi (ISBT)",
+                to: "Mumbai (Central)",
+                departure: "09:00 PM",
+                arrival: "10:00 AM",
+                date: "2023-11-15",
+                duration: "13h 0m",
+                price: 1499,
+                amenities: ["AC", "Sleeper", "Water Bottle"],
+                type: "Sleeper"
+            },
+            {
+                id: 102,
+                provider: "Orange Tours",
+                logo: "fas fa-bus",
+                from: "Delhi (ISBT)",
+                to: "Mumbai (Central)",
+                departure: "10:30 PM",
+                arrival: "12:00 PM",
+                date: "2023-11-15",
+                duration: "13h 30m",
+                price: 1299,
+                amenities: ["AC", "Sleeper", "Blanket"],
+                type: "Sleeper"
+            },
+            {
+                id: 103,
+                provider: "Neeta Travels",
+                logo: "fas fa-bus",
+                from: "Mumbai (Central)",
+                to: "Goa (Panaji)",
+                departure: "08:00 PM",
+                arrival: "06:00 AM",
+                date: "2023-11-16",
+                duration: "10h 0m",
+                price: 1199,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 104,
+                provider: "VRL Travels",
+                logo: "fas fa-bus",
+                from: "Bangalore (Majestic)",
+                to: "Chennai (CMBT)",
+                departure: "10:00 PM",
+                arrival: "05:00 AM",
+                date: "2023-11-16",
+                duration: "7h 0m",
+                price: 899,
+                amenities: ["AC", "Semi-Sleeper"],
+                type: "Semi-Sleeper"
+            },
+            {
+                id: 105,
+                provider: "KPN Travels",
+                logo: "fas fa-bus",
+                from: "Chennai (CMBT)",
+                to: "Hyderabad (JBS)",
+                departure: "09:30 PM",
+                arrival: "06:30 AM",
+                date: "2023-11-16",
+                duration: "9h 0m",
+                price: 1099,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 106,
+                provider: "SRS Travels",
+                logo: "fas fa-bus",
+                from: "Delhi (ISBT)",
+                to: "Jaipur (Sindhi Camp)",
+                departure: "11:00 PM",
+                arrival: "05:00 AM",
+                date: "2023-11-16",
+                duration: "6h 0m",
+                price: 699,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 107,
+                provider: "Patel Travels",
+                logo: "fas fa-bus",
+                from: "Mumbai (Central)",
+                to: "Ahmedabad (Geeta Mandir)",
+                departure: "10:00 PM",
+                arrival: "07:00 AM",
+                date: "2023-11-16",
+                duration: "9h 0m",
+                price: 999,
+                amenities: ["AC", "Sleeper", "Blanket"],
+                type: "Sleeper"
+            },
+            {
+                id: 108,
+                provider: "Morning Star",
+                logo: "fas fa-bus",
+                from: "Bangalore (Majestic)",
+                to: "Mysore (Mysore Bus Stand)",
+                departure: "07:00 AM",
+                arrival: "10:30 AM",
+                date: "2023-11-16",
+                duration: "3h 30m",
+                price: 499,
+                amenities: ["AC"],
+                type: "Seater"
+            },
+            {
+                id: 109,
+                provider: "Kallada Travels",
+                logo: "fas fa-bus",
+                from: "Chennai (CMBT)",
+                to: "Bangalore (Majestic)",
+                departure: "10:30 PM",
+                arrival: "05:30 AM",
+                date: "2023-11-17",
+                duration: "7h 0m",
+                price: 849,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 110,
+                provider: "Parveen Travels",
+                logo: "fas fa-bus",
+                from: "Delhi (ISBT)",
+                to: "Chandigarh (Chandigarh Bus Stand)",
+                departure: "11:30 PM",
+                arrival: "04:30 AM",
+                date: "2023-11-17",
+                duration: "5h 0m",
+                price: 599,
+                amenities: ["AC"],
+                type: "Seater"
+            },
+            // Buses 111-120
+            {
+                id: 111,
+                provider: "Sharma Travels",
+                logo: "fas fa-bus",
+                from: "Mumbai (Central)",
+                to: "Pune (Pune Station)",
+                departure: "09:00 PM",
+                arrival: "12:30 AM",
+                date: "2023-11-17",
+                duration: "3h 30m",
+                price: 549,
+                amenities: ["AC"],
+                type: "Seater"
+            },
+            {
+                id: 112,
+                provider: "Hans Travels",
+                logo: "fas fa-bus",
+                from: "Hyderabad (JBS)",
+                to: "Bangalore (Majestic)",
+                departure: "10:30 PM",
+                arrival: "06:30 AM",
+                date: "2023-11-17",
+                duration: "8h 0m",
+                price: 949,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 113,
+                provider: "Kaveri Travels",
+                logo: "fas fa-bus",
+                from: "Chennai (CMBT)",
+                to: "Coimbatore (CBE)",
+                departure: "11:00 PM",
+                arrival: "05:00 AM",
+                date: "2023-11-18",
+                duration: "6h 0m",
+                price: 749,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 114,
+                provider: "Diwakar Travels",
+                logo: "fas fa-bus",
+                from: "Delhi (ISBT)",
+                to: "Dehradun (Dehradun Bus Stand)",
+                departure: "10:00 PM",
+                arrival: "06:00 AM",
+                date: "2023-11-18",
+                duration: "8h 0m",
+                price: 799,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 115,
+                provider: "Hebron Transports",
+                logo: "fas fa-bus",
+                from: "Bangalore (Majestic)",
+                to: "Hyderabad (JBS)",
+                departure: "09:30 PM",
+                arrival: "06:30 AM",
+                date: "2023-11-18",
+                duration: "9h 0m",
+                price: 999,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 116,
+                provider: "Royal Travels",
+                logo: "fas fa-bus",
+                from: "Mumbai (Central)",
+                to: "Goa (Panaji)",
+                departure: "08:30 PM",
+                arrival: "06:30 AM",
+                date: "2023-11-18",
+                duration: "10h 0m",
+                price: 1199,
+                amenities: ["AC", "Sleeper", "Blanket"],
+                type: "Sleeper"
+            },
+            {
+                id: 117,
+                provider: "City Travels",
+                logo: "fas fa-bus",
+                from: "Chennai (CMBT)",
+                to: "Bangalore (Majestic)",
+                departure: "11:30 PM",
+                arrival: "05:30 AM",
+                date: "2023-11-19",
+                duration: "6h 0m",
+                price: 799,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 118,
+                provider: "Sahara Travels",
+                logo: "fas fa-bus",
+                from: "Delhi (ISBT)",
+                to: "Manali (Manali Bus Stand)",
+                departure: "07:00 PM",
+                arrival: "08:00 AM",
+                date: "2023-11-19",
+                duration: "13h 0m",
+                price: 1299,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 119,
+                provider: "GreenLine Travels",
+                logo: "fas fa-bus",
+                from: "Hyderabad (JBS)",
+                to: "Vijayawada (Vijayawada Bus Stand)",
+                departure: "10:00 PM",
+                arrival: "04:00 AM",
+                date: "2023-11-19",
+                duration: "6h 0m",
+                price: 699,
+                amenities: ["AC"],
+                type: "Sleeper"
+            },
+            {
+                id: 120,
+                provider: "Raj Ratan Tours",
+                logo: "fas fa-bus",
+                from: "Bangalore (Majestic)",
+                to: "Chennai (CMBT)",
+                departure: "11:00 PM",
+                arrival: "05:00 AM",
+                date: "2023-11-20",
+                duration: "6h 0m",
+                price: 749,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            // Buses 121-130
+            {
+                id: 121,
+                provider: "KPN Travels",
+                logo: "fas fa-bus",
+                from: "Mumbai (Central)",
+                to: "Pune (Pune Station)",
+                departure: "09:30 PM",
+                arrival: "01:00 AM",
+                date: "2023-11-20",
+                duration: "3h 30m",
+                price: 549,
+                amenities: ["AC"],
+                type: "Seater"
+            },
+            {
+                id: 122,
+                provider: "VRL Travels",
+                logo: "fas fa-bus",
+                from: "Chennai (CMBT)",
+                to: "Bangalore (Majestic)",
+                departure: "10:00 PM",
+                arrival: "04:00 AM",
+                date: "2023-11-20",
+                duration: "6h 0m",
+                price: 799,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 123,
+                provider: "Orange Tours",
+                logo: "fas fa-bus",
+                from: "Delhi (ISBT)",
+                to: "Jaipur (Sindhi Camp)",
+                departure: "11:30 PM",
+                arrival: "05:30 AM",
+                date: "2023-11-21",
+                duration: "6h 0m",
+                price: 699,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 124,
+                provider: "Neeta Travels",
+                logo: "fas fa-bus",
+                from: "Bangalore (Majestic)",
+                to: "Goa (Panaji)",
+                departure: "08:00 PM",
+                arrival: "08:00 AM",
+                date: "2023-11-21",
+                duration: "12h 0m",
+                price: 1299,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 125,
+                provider: "Patel Travels",
+                logo: "fas fa-bus",
+                from: "Hyderabad (JBS)",
+                to: "Bangalore (Majestic)",
+                departure: "09:30 PM",
+                arrival: "06:30 AM",
+                date: "2023-11-21",
+                duration: "9h 0m",
+                price: 949,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 126,
+                provider: "Morning Star",
+                logo: "fas fa-bus",
+                from: "Chennai (CMBT)",
+                to: "Coimbatore (CBE)",
+                departure: "10:00 PM",
+                arrival: "04:00 AM",
+                date: "2023-11-22",
+                duration: "6h 0m",
+                price: 749,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 127,
+                provider: "Kallada Travels",
+                logo: "fas fa-bus",
+                from: "Delhi (ISBT)",
+                to: "Dehradun (Dehradun Bus Stand)",
+                departure: "09:00 PM",
+                arrival: "05:00 AM",
+                date: "2023-11-22",
+                duration: "8h 0m",
+                price: 799,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 128,
+                provider: "Parveen Travels",
+                logo: "fas fa-bus",
+                from: "Bangalore (Majestic)",
+                to: "Hyderabad (JBS)",
+                departure: "10:30 PM",
+                arrival: "07:30 AM",
+                date: "2023-11-22",
+                duration: "9h 0m",
+                price: 999,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 129,
+                provider: "Sharma Travels",
+                logo: "fas fa-bus",
+                from: "Mumbai (Central)",
+                to: "Goa (Panaji)",
+                departure: "08:30 PM",
+                arrival: "08:30 AM",
+                date: "2023-11-23",
+                duration: "12h 0m",
+                price: 1199,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 130,
+                provider: "Hans Travels",
+                logo: "fas fa-bus",
+                from: "Chennai (CMBT)",
+                to: "Bangalore (Majestic)",
+                departure: "11:00 PM",
+                arrival: "05:00 AM",
+                date: "2023-11-23",
+                duration: "6h 0m",
+                price: 799,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            // Buses 131-140
+            {
+                id: 131,
+                provider: "Kaveri Travels",
+                logo: "fas fa-bus",
+                from: "Delhi (ISBT)",
+                to: "Jaipur (Sindhi Camp)",
+                departure: "10:30 PM",
+                arrival: "04:30 AM",
+                date: "2023-11-24",
+                duration: "6h 0m",
+                price: 699,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 132,
+                provider: "Diwakar Travels",
+                logo: "fas fa-bus",
+                from: "Bangalore (Majestic)",
+                to: "Goa (Panaji)",
+                departure: "08:00 PM",
+                arrival: "08:00 AM",
+                date: "2023-11-24",
+                duration: "12h 0m",
+                price: 1299,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 133,
+                provider: "Hebron Transports",
+                logo: "fas fa-bus",
+                from: "Hyderabad (JBS)",
+                to: "Bangalore (Majestic)",
+                departure: "09:30 PM",
+                arrival: "06:30 AM",
+                date: "2023-11-24",
+                duration: "9h 0m",
+                price: 949,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 134,
+                provider: "Royal Travels",
+                logo: "fas fa-bus",
+                from: "Chennai (CMBT)",
+                to: "Coimbatore (CBE)",
+                departure: "10:00 PM",
+                arrival: "04:00 AM",
+                date: "2023-11-25",
+                duration: "6h 0m",
+                price: 749,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 135,
+                provider: "City Travels",
+                logo: "fas fa-bus",
+                from: "Delhi (ISBT)",
+                to: "Dehradun (Dehradun Bus Stand)",
+                departure: "09:00 PM",
+                arrival: "05:00 AM",
+                date: "2023-11-25",
+                duration: "8h 0m",
+                price: 799,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 136,
+                provider: "Sahara Travels",
+                logo: "fas fa-bus",
+                from: "Bangalore (Majestic)",
+                to: "Hyderabad (JBS)",
+                departure: "10:30 PM",
+                arrival: "07:30 AM",
+                date: "2023-11-25",
+                duration: "9h 0m",
+                price: 999,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 137,
+                provider: "GreenLine Travels",
+                logo: "fas fa-bus",
+                from: "Mumbai (Central)",
+                to: "Goa (Panaji)",
+                departure: "08:30 PM",
+                arrival: "08:30 AM",
+                date: "2023-11-26",
+                duration: "12h 0m",
+                price: 1199,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 138,
+                provider: "Raj Ratan Tours",
+                logo: "fas fa-bus",
+                from: "Chennai (CMBT)",
+                to: "Bangalore (Majestic)",
+                departure: "11:00 PM",
+                arrival: "05:00 AM",
+                date: "2023-11-26",
+                duration: "6h 0m",
+                price: 799,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 139,
+                provider: "KPN Travels",
+                logo: "fas fa-bus",
+                from: "Delhi (ISBT)",
+                to: "Jaipur (Sindhi Camp)",
+                departure: "10:30 PM",
+                arrival: "04:30 AM",
+                date: "2023-11-27",
+                duration: "6h 0m",
+                price: 699,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 140,
+                provider: "VRL Travels",
+                logo: "fas fa-bus",
+                from: "Bangalore (Majestic)",
+                to: "Goa (Panaji)",
+                departure: "08:00 PM",
+                arrival: "08:00 AM",
+                date: "2023-11-27",
+                duration: "12h 0m",
+                price: 1299,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            // Buses 141-150
+            {
+                id: 141,
+                provider: "Orange Tours",
+                logo: "fas fa-bus",
+                from: "Hyderabad (JBS)",
+                to: "Bangalore (Majestic)",
+                departure: "09:30 PM",
+                arrival: "06:30 AM",
+                date: "2023-11-27",
+                duration: "9h 0m",
+                price: 949,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 142,
+                provider: "Neeta Travels",
+                logo: "fas fa-bus",
+                from: "Chennai (CMBT)",
+                to: "Coimbatore (CBE)",
+                departure: "10:00 PM",
+                arrival: "04:00 AM",
+                date: "2023-11-28",
+                duration: "6h 0m",
+                price: 749,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 143,
+                provider: "Patel Travels",
+                logo: "fas fa-bus",
+                from: "Delhi (ISBT)",
+                to: "Dehradun (Dehradun Bus Stand)",
+                departure: "09:00 PM",
+                arrival: "05:00 AM",
+                date: "2023-11-28",
+                duration: "8h 0m",
+                price: 799,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 144,
+                provider: "Morning Star",
+                logo: "fas fa-bus",
+                from: "Bangalore (Majestic)",
+                to: "Hyderabad (JBS)",
+                departure: "10:30 PM",
+                arrival: "07:30 AM",
+                date: "2023-11-28",
+                duration: "9h 0m",
+                price: 999,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 145,
+                provider: "Kallada Travels",
+                logo: "fas fa-bus",
+                from: "Mumbai (Central)",
+                to: "Goa (Panaji)",
+                departure: "08:30 PM",
+                arrival: "08:30 AM",
+                date: "2023-11-29",
+                duration: "12h 0m",
+                price: 1199,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 146,
+                provider: "Parveen Travels",
+                logo: "fas fa-bus",
+                from: "Chennai (CMBT)",
+                to: "Bangalore (Majestic)",
+                departure: "11:00 PM",
+                arrival: "05:00 AM",
+                date: "2023-11-29",
+                duration: "6h 0m",
+                price: 799,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 147,
+                provider: "Sharma Travels",
+                logo: "fas fa-bus",
+                from: "Delhi (ISBT)",
+                to: "Jaipur (Sindhi Camp)",
+                departure: "10:30 PM",
+                arrival: "04:30 AM",
+                date: "2023-11-30",
+                duration: "6h 0m",
+                price: 699,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 148,
+                provider: "Hans Travels",
+                logo: "fas fa-bus",
+                from: "Bangalore (Majestic)",
+                to: "Goa (Panaji)",
+                departure: "08:00 PM",
+                arrival: "08:00 AM",
+                date: "2023-11-30",
+                duration: "12h 0m",
+                price: 1299,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 149,
+                provider: "Kaveri Travels",
+                logo: "fas fa-bus",
+                from: "Hyderabad (JBS)",
+                to: "Bangalore (Majestic)",
+                departure: "09:30 PM",
+                arrival: "06:30 AM",
+                date: "2023-11-30",
+                duration: "9h 0m",
+                price: 949,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            },
+            {
+                id: 150,
+                provider: "Diwakar Travels",
+                logo: "fas fa-bus",
+                from: "Chennai (CMBT)",
+                to: "Coimbatore (CBE)",
+                departure: "10:00 PM",
+                arrival: "04:00 AM",
+                date: "2023-12-01",
+                duration: "6h 0m",
+                price: 749,
+                amenities: ["AC", "Sleeper"],
+                type: "Sleeper"
+            }
+        ];
+        
+        // Combine all travel options into one array
+        const allTravelOptions = [...sampleFlights, ...sampleTrains, ...sampleBuses];
+        
+            // Variables to store booking data
+            let selectedTicket = null;
+            let passengers = 2;
+        
+            // IMPROVED SEARCH FUNCTION - Uses new searchTickets function
+            /**
+             * Search function that filters tickets based on toAddress, fromAddress, and type
+             * @param {Array} tickets - Array of ticket objects
+             * @param {string} toAddress - Destination location to search for
+             * @param {string} fromAddress - Departure location to search for
+             * @param {string} ticketType - Ticket type to search for (e.g., "Economy", "Sleeper")
+             * @returns {Array} - Filtered array of ticket objects matching the criteria
+             */
+            function searchTickets(tickets, toAddress, fromAddress, ticketType) {
+                // Return all tickets if all search parameters are empty
+                if ((!toAddress || toAddress.trim() === '') && 
+                    (!fromAddress || fromAddress.trim() === '') && 
+                    (!ticketType || ticketType.trim() === '')) {
+                    return tickets;
+                }
+        
+                // Filter tickets based on the provided criteria
+                return tickets.filter(ticket => {
+                    // Check if toAddress matches (if provided)
+                    const toMatch = !toAddress || ticket.to?.toLowerCase().includes(toAddress.toLowerCase());
+                    
+                    // Check if fromAddress matches (if provided)
+                    const fromMatch = !fromAddress || ticket.from?.toLowerCase().includes(fromAddress.toLowerCase());
+                    
+                    // Check if type matches (if provided)
+                    const typeMatch = !ticketType || ticket.type?.toLowerCase() === ticketType.toLowerCase();
+                    
+                    // Return true only if all provided criteria match
+                    return toMatch && fromMatch && typeMatch;
+                });
+            }
+        
+            // New search event handlers for each transport type
+            document.getElementById('search-flights').addEventListener('click', function() {
+                const fromLocation = document.getElementById('flight-from').value;
+                const toLocation = document.getElementById('flight-to').value;
+                const flightType = document.getElementById('flight-class').value;
+                
+                const filteredFlights = searchTickets(sampleFlights, toLocation, fromLocation, flightType);
+                displayTickets(filteredFlights, 'flight');
+            });
+        
+            document.getElementById('search-trains').addEventListener('click', function() {
+                const fromLocation = document.getElementById('train-from').value;
+                const toLocation = document.getElementById('train-to').value;
+                const trainType = document.getElementById('train-class').value;
+                
+                const filteredTrains = searchTickets(sampleTrains, toLocation, fromLocation, trainType);
+                displayTickets(filteredTrains, 'train');
+            });
+        
+            document.getElementById('search-buses').addEventListener('click', function() {
+                const fromLocation = document.getElementById('bus-from').value;
+                const toLocation = document.getElementById('bus-to').value;
+                const busType = document.getElementById('bus-class').value;
+                
+                const filteredBuses = searchTickets(sampleBuses, toLocation, fromLocation, busType);
+                displayTickets(filteredBuses, 'bus');
+            });
+        
+            // Display tickets function (renamed from the old searchTickets)
+            function displayTickets(tickets, type) {
+                const ticketsList = document.getElementById('tickets-list');
+                ticketsList.innerHTML = '';
+                
+                if (tickets.length === 0) {
+                    ticketsList.innerHTML = '<p>No tickets found matching your criteria. Try different dates or route.</p>';
+                    return;
+                }
+                
+                tickets.forEach(ticket => {
+                    const ticketElement = document.createElement('div');
+                    ticketElement.className = 'ticket-card';
+                    ticketElement.dataset.id = ticket.id;
+                    ticketElement.dataset.type = type;
+                    
+                    ticketElement.innerHTML = `
+                        <div class="ticket-header">
+                            <div class="ticket-provider">
+                                <div class="ticket-provider-logo">
+                                    <i class="${ticket.logo}"></i>
+                                </div>
+                                <div class="ticket-provider-name">${ticket.provider}</div>
+                            </div>
+                            <div class="ticket-price">₹${ticket.price.toLocaleString()}</div>
+                        </div>
+                        <div class="ticket-details">
+                            <div class="ticket-departure">
+                                <div class="ticket-time">${ticket.departure}</div>
+                                <div class="ticket-date">${formatDate(ticket.date)}</div>
+                                <div class="ticket-place">${ticket.from}</div>
+                            </div>
+                            <div class="ticket-duration">
+                                <div>${ticket.duration}</div>
+                                <div class="ticket-duration-line"></div>
+                                <div>${type === 'flight' ? 'Non-stop' : 'Direct'}</div>
+                            </div>
+                            <div class="ticket-arrival">
+                                <div class="ticket-time">${ticket.arrival}</div>
+                                <div class="ticket-date">${formatDate(ticket.date)}</div>
+                                <div class="ticket-place">${ticket.to}</div>
+                            </div>
+                        </div>
+                        <div class="ticket-amenities">
+                            ${ticket.amenities.map(amenity => `
+                                <div class="amenity">
+                                    <i class="fas fa-check"></i> ${amenity}
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="ticket-actions">
+                            <button class="plan-btn small-btn select-ticket" data-id="${ticket.id}" data-type="${type}">
+                                <i class="fas fa-ticket-alt"></i> Select
+                            </button>
+                        </div>
+                    `;
+                    
+                    ticketsList.appendChild(ticketElement);
+                });
+                
+                // Add event listeners to select buttons
+                document.querySelectorAll('.select-ticket').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const ticketId = parseInt(this.dataset.id);
+                        const ticketType = this.dataset.type;
+                        selectTicket(ticketId, ticketType);
+                    });
+                });
+            }
+        
+            // Select ticket function
+            function selectTicket(ticketId, type) {
+                let tickets;
+                if (type === 'flight') tickets = sampleFlights;
+                else if (type === 'train') tickets = sampleTrains;
+                else tickets = sampleBuses;
+                
+                selectedTicket = tickets.find(ticket => ticket.id === ticketId);
+                
+                if (!selectedTicket) return;
+                
+                // Get passenger count
+                passengers = parseInt(document.getElementById(`${type}-passengers`).value);
+                
+                // Update booking summary
+                const totalPrice = selectedTicket.price * passengers;
+                const departureDate = formatDate(selectedTicket.date);
+                
+                document.getElementById('booking-summary').innerHTML = `
+                    <h3><i class="fas fa-receipt"></i> Booking Summary</h3>
+                    <div class="selected-ticket">
+                        <div class="selected-ticket-header">
+                            <div class="selected-ticket-title">${selectedTicket.provider} - ${selectedTicket.type}</div>
+                            <div class="selected-ticket-price">₹${totalPrice.toLocaleString()}</div>
+                        </div>
+                        <div class="selected-ticket-dates">${departureDate} | ${selectedTicket.departure} - ${selectedTicket.arrival}</div>
+                        <div class="selected-ticket-dates">${selectedTicket.from} to ${selectedTicket.to}</div>
+                    </div>
+                    <div class="booking-details">
+                        <div class="booking-detail">
+                            <span>${passengers} x ₹${selectedTicket.price.toLocaleString()}</span>
+                            <span>₹${(selectedTicket.price * passengers).toLocaleString()}</span>
+                        </div>
+                        <div class="booking-detail">
+                            <span>Taxes & Fees</span>
+                            <span>₹${Math.round(selectedTicket.price * passengers * 0.18).toLocaleString()}</span>
+                        </div>
+                        <div class="booking-detail total">
+                            <span>Total</span>
+                            <span>₹${Math.round(selectedTicket.price * passengers * 1.18).toLocaleString()}</span>
+                        </div>
+                    </div>
+                    <div class="booking-actions">
+                        <button class="plan-btn" id="book-now">
+                            <i class="fas fa-credit-card"></i> Book Now
+                        </button>
+                    </div>
+                `;
+                
+                // Add event listener to book now button
+                document.getElementById('book-now').addEventListener('click', showBookingModal);
+            }
+        
+            // Show booking modal function
+            function showBookingModal() {
+                if (!selectedTicket) return;
+                
+                const departureDate = formatDate(selectedTicket.date);
+                const totalPrice = Math.round(selectedTicket.price * passengers * 1.18);
+                let ticketType = '';
+                if (selectedTicket.logo === 'fas fa-plane') ticketType = 'Flight';
+                else if (selectedTicket.logo === 'fas fa-train') ticketType = 'Train';
+                else ticketType = 'Bus';
+                
+                // Update modal content
+                document.getElementById('modal-ticket-name').textContent = `${ticketType} - ${selectedTicket.provider}`;
+                document.getElementById('modal-ticket-price').textContent = `₹${totalPrice.toLocaleString()}`;
+                document.getElementById('modal-ticket-dates').textContent = 
+                    `${departureDate} | ${selectedTicket.departure} - ${selectedTicket.arrival}`;
+                
+                // Show modal
+                document.getElementById('booking-modal').classList.add('active');
+                
+                // Reset form
+                document.getElementById('first-name').value = '';
+                document.getElementById('last-name').value = '';
+                document.getElementById('passenger-email').value = '';
+                document.getElementById('passenger-phone').value = '';
+                document.getElementById('card-number').value = '';
+                document.getElementById('expiry-date').value = '';
+                document.getElementById('cvv').value = '';
+                document.getElementById('card-name').value = '';
+            }
+        
+            // Close modal function
+            function closeModal() {
+                document.getElementById('booking-modal').classList.remove('active');
+            }
+        
+            // Close confirmation modal function
+            function closeConfirmationModal() {
+                document.getElementById('confirmation-modal').classList.remove('active');
+            }
+        
+            // Format date function
+            function formatDate(dateString) {
+                const options = { month: 'short', day: 'numeric', year: 'numeric' };
+                return new Date(dateString).toLocaleDateString('en-US', options);
+            }
+        
+            // Event listeners for modals
+            document.getElementById('modal-close').addEventListener('click', closeModal);
+            document.getElementById('cancel-booking').addEventListener('click', closeModal);
+            
+            document.getElementById('confirm-booking').addEventListener('click', function() {
+                // Validate form
+                const firstName = document.getElementById('first-name').value;
+                const lastName = document.getElementById('last-name').value;
+                const email = document.getElementById('passenger-email').value;
+                const phone = document.getElementById('passenger-phone').value;
+                const cardNumber = document.getElementById('card-number').value;
+                const expiryDate = document.getElementById('expiry-date').value;
+                const cvv = document.getElementById('cvv').value;
+                const cardName = document.getElementById('card-name').value;
+                
+                if (!firstName || !lastName || !email || !phone || !cardNumber || !expiryDate || !cvv || !cardName) {
+                    alert('Please fill in all required fields');
+                    return;
+                }
+                
+                // Simulate payment processing
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                this.disabled = true;
+                
+                setTimeout(() => {
+                    // Show confirmation
+                    showConfirmation();
+                    
+                    // Reset button
+                    this.innerHTML = '<i class="fas fa-lock"></i> Confirm Booking';
+                    this.disabled = false;
+                    
+                    // Close booking modal
+                    closeModal();
+                }, 2000);
+            });
+            
+            document.getElementById('done-button').addEventListener('click', function() {
+                closeConfirmationModal();
+            });
+        
+            // Show confirmation function
+            function showConfirmation() {
+                if (!selectedTicket) return;
+                
+                const departureDate = formatDate(selectedTicket.date);
+                const totalPrice = Math.round(selectedTicket.price * passengers * 1.18);
+                let ticketType = '';
+                if (selectedTicket.logo === 'fas fa-plane') ticketType = 'Flight';
+                else if (selectedTicket.logo === 'fas fa-train') ticketType = 'Train';
+                else ticketType = 'Bus';
+                
+                // Update confirmation modal
+                document.getElementById('confirmation-type').textContent = ticketType;
+                document.getElementById('confirmation-route').textContent = 
+                    `${selectedTicket.from.split(' (')[0]} to ${selectedTicket.to.split(' (')[0]}`;
+                document.getElementById('confirmation-datetime').textContent = 
+                    `${departureDate} | ${selectedTicket.departure}`;
+                document.getElementById('confirmation-passengers').textContent = passengers;
+                document.getElementById('confirmation-total').textContent = `₹${totalPrice.toLocaleString()}`;
+                
+                // Show modal
+                document.getElementById('confirmation-modal').classList.add('active');
+            }
+        
+            // Payment method selection
+            document.querySelectorAll('.payment-method').forEach(method => {
+                method.addEventListener('click', function() {
+                    document.querySelectorAll('.payment-method').forEach(m => {
+                        m.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                });
+            });
+        
+            // Set default dates (today + 3 days)
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            const defaultReturn = new Date(today);
+            defaultReturn.setDate(defaultReturn.getDate() + 3);
+            
+            document.getElementById('flight-departure').valueAsDate = tomorrow;
+            document.getElementById('flight-return').valueAsDate = defaultReturn;
+            document.getElementById('train-date').valueAsDate = tomorrow;
+            document.getElementById('bus-date').valueAsDate = tomorrow;
+        });
+        </script>
+</body>
+</html>

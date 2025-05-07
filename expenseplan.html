@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Trip | Expenses Planner</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Base Styles with Enhanced Variables */
+        :root {
+            --primary: #6C63FF;
+            --primary-light: #8a84ff;
+            --secondary: #FF6584;
+            --accent: #43C6AC;
+            --accent-dark: #2fa58f;
+            --dark: #2D3748;
+            --dark-light: #4a5568;
+            --light: #F7FAFC;
+            --gradient: linear-gradient(135deg, #6C63FF 0%, #43C6AC 100%);
+            --gradient-hover: linear-gradient(135deg, #5a52e0 0%, #3ab79e 100%);
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+            --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.2);
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            --border-radius: 16px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Header Styles with Sticky Effect */
+        header {
+            background: white;
+            color: var(--dark);
+            padding: 1rem 0;
+            box-shadow: var(--shadow-sm);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            transition: var(--transition);
+        }
+
+        header.scrolled {
+            padding: 0.5rem 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            color: var(--primary);
+        }
+
+        .logo i {
+            margin-right: 0.5rem;
+            font-size: 2rem;
+            transition: var(--transition);
+        }
+
+        .logo:hover i {
+            transform: rotate(-15deg);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-left: 2rem;
+            position: relative;
+        }
+
+        nav ul li a {
+            color: var(--dark);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 0.5rem 0;
+            position: relative;
+        }
+
+        nav ul li a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary);
+            transition: width 0.4s ease;
+        }
+
+        nav ul li a:hover::after {
+            width: 100%;
+        }
+
+        nav ul li a:hover {
+            color: var(--primary);
+        }
+
+        .btn-outline {
+            border: 2px solid var(--primary);
+            background: transparent;
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+        }
+
+        .btn-solid {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+        }
+
+        .btn-solid:hover {
+            background: var(--gradient-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(108, 99, 255, 0.4);
+        }
+
+        /* Hamburger Menu for Mobile */
+        .hamburger {
+            display: none;
+            cursor: pointer;
+            width: 30px;
+            height: 20px;
+            position: relative;
+            z-index: 1001;
+        }
+
+        .hamburger span {
+            display: block;
+            position: absolute;
+            height: 3px;
+            width: 100%;
+            background: var(--primary);
+            border-radius: 3px;
+            opacity: 1;
+            left: 0;
+            transform: rotate(0deg);
+            transition: var(--transition);
+        }
+
+        .hamburger span:nth-child(1) {
+            top: 0;
+        }
+
+        .hamburger span:nth-child(2), .hamburger span:nth-child(3) {
+            top: 10px;
+        }
+
+        .hamburger span:nth-child(4) {
+            top: 20px;
+        }
+
+        .hamburger.open span:nth-child(1) {
+            top: 10px;
+            width: 0%;
+            left: 50%;
+        }
+
+        .hamburger.open span:nth-child(2) {
+            transform: rotate(45deg);
+        }
+
+        .hamburger.open span:nth-child(3) {
+            transform: rotate(-45deg);
+        }
+
+        .hamburger.open span:nth-child(4) {
+            top: 10px;
+            width: 0%;
+            left: 50%;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1400px;
+            margin: 6rem auto;
+            padding: 0 2rem;
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .page-header h1 {
+            font-size: 2.8rem;
+            color: var(--dark);
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            position: relative;
+        }
+
+        .page-header h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 80px;
+            height: 4px;
+            background: var(--gradient);
+            border-radius: 2px;
+        }
+
+        /* Planner Sections */
+        .planner-sections {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 3rem;
+        }
+
+        .planner-section {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2.5rem;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            animation: fadeIn 0.8s ease-out forwards;
+            opacity: 0;
+        }
+
+        .planner-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--gradient);
+            transition: var(--transition);
+        }
+
+        .planner-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .planner-section:hover::before {
+            height: 8px;
+        }
+
+        .section-title {
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-title i {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+            transition: var(--transition);
+        }
+
+        .section-title:hover i {
+            transform: scale(1.1) rotate(10deg);
+        }
+
+        .section-title h2 {
+            font-size: 1.8rem;
+            color: var(--dark);
+            transition: var(--transition);
+        }
+
+        .section-title:hover h2 {
+            color: var(--primary);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+            transition: var(--transition);
+        }
+
+        .form-group:hover label {
+            color: var(--primary);
+        }
+
+        .form-group input, 
+        .form-group select, 
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus, 
+        .form-group select:focus, 
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.2);
+        }
+
+        .form-group:hover input,
+        .form-group:hover select,
+        .form-group:hover textarea {
+            border-color: var(--primary-light);
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        .plan-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.9rem 2rem;
+            background: var(--gradient);
+            color: white;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .plan-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
+            transform: translateX(-100%);
+            transition: var(--transition);
+        }
+
+        .plan-btn:hover {
+            transform: translateY(-3px);
+            background: var(--gradient-hover);
+            box-shadow: 0 10px 25px rgba(108, 99, 255, 0.4);
+        }
+
+        .plan-btn:hover::after {
+            transform: translateX(100%);
+        }
+
+        .plan-btn i {
+            transition: var(--transition);
+        }
+
+        .plan-btn:hover i {
+            transform: translateX(3px);
+        }
+
+        /* AI Response Section */
+        .ai-response {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(108, 99, 255, 0.05);
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--primary);
+            transition: var(--transition);
+        }
+
+        .ai-response:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.1);
+        }
+
+        .ai-response h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .ai-response p {
+            color: var(--dark-light);
+            line-height: 1.7;
+        }
+
+        .ai-response.loading {
+            background: rgba(108, 99, 255, 0.03);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ai-response.loading::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(108, 99, 255, 0.05), transparent);
+            animation: loading 1.5s infinite;
+        }
+
+        .ai-actions {
+            margin-top: 1.5rem;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        @keyframes loading {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Manual Planning Results */
+        .manual-results {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 992px) {
+            .manual-results {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .expenses-list {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            max-height: 500px;
+            overflow-y: auto;
+            transition: var(--transition);
+        }
+
+        .expenses-list:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .expenses-list h3 {
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .expense-item {
+            padding: 1rem 0;
+            border-bottom: 1px solid #edf2f7;
+            animation: fadeIn 0.5s ease-out;
+            transition: var(--transition);
+        }
+
+        .expense-item:hover {
+            background: rgba(108, 99, 255, 0.03);
+            transform: translateX(5px);
+        }
+
+        .expense-item:last-child {
+            border-bottom: none;
+        }
+
+        .expense-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .expense-title {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .expense-amount {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .expense-details {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+            color: var(--dark-light);
+        }
+
+        .expense-date {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            transition: var(--transition);
+        }
+
+        .expense-item:hover .expense-date {
+            color: var(--primary);
+        }
+
+        .expense-category {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.2rem 0.5rem;
+            background: rgba(67, 198, 172, 0.1);
+            border-radius: 50px;
+            color: var(--accent-dark);
+            font-size: 0.8rem;
+            transition: var(--transition);
+        }
+
+        .expense-item:hover .expense-category {
+            background: rgba(67, 198, 172, 0.2);
+            transform: scale(1.05);
+        }
+
+        .no-expenses {
+            text-align: center;
+            padding: 2rem;
+            color: var(--dark-light);
+        }
+
+        /* Summary Card */
+        .summary-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            height: fit-content;
+            position: sticky;
+            top: 1rem;
+            transition: var(--transition);
+        }
+
+        .summary-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-3px);
+        }
+
+        .summary-card h3 {
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            transition: var(--transition);
+        }
+
+        .summary-item:hover {
+            transform: translateX(5px);
+        }
+
+        .summary-label {
+            color: var(--dark-light);
+            transition: var(--transition);
+        }
+
+        .summary-item:hover .summary-label {
+            color: var(--primary);
+        }
+
+        .summary-value {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .total {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 2px solid #e2e8f0;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .total .summary-value {
+            color: var(--primary);
+            font-size: 1.3rem;
+        }
+
+        /* Delete Button */
+        .delete-expense {
+            margin-top: 0.5rem;
+            padding: 0.3rem 0.8rem;
+            background: rgba(255, 101, 132, 0.1);
+            border: none;
+            border-radius: 50px;
+            color: var(--secondary);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .delete-expense:hover {
+            background: rgba(255, 101, 132, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .planner-section:nth-child(1) { animation-delay: 0.1s; }
+        .planner-section:nth-child(2) { animation-delay: 0.3s; }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .page-header h1 {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hamburger {
+                display: block;
+            }
+            
+            nav {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 80%;
+                max-width: 350px;
+                height: 100vh;
+                background: white;
+                box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
+                transition: var(--transition);
+                z-index: 1000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            nav.active {
+                right: 0;
+            }
+            
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+                padding: 2rem;
+                width: 100%;
+            }
+            
+            nav ul li {
+                margin: 1rem 0;
+            }
+            
+            nav ul li a {
+                color: var(--dark);
+                font-size: 1.2rem;
+            }
+            
+            .header-content {
+                padding: 1rem;
+            }
+            
+            .main-content {
+                margin-top: 5rem;
+            }
+            
+            .page-header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .planner-section {
+                padding: 1.5rem;
+            }
+            
+            .section-title h2 {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .page-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .planner-section {
+                padding: 1.5rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header id="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-plane"></i>
+                <span>Smart Trip</span>
+            </div>
+            <nav id="nav">
+                <ul>
+                    <li><a href="afterhome.html">Home</a></li>
+                    <li><a href="#">Destinations</a></li>
+                    <li><a href="#">Features</a></li>
+                    <li><a href="expenseplan.html">Expenses Planner</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </nav>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1>Expenses Planner</h1>
+        </div>
+
+        <!-- Planner Sections -->
+        <div class="planner-sections">
+            <!-- AI Planning Section -->
+            <section class="planner-section">
+                <div class="section-title">
+                    <i class="fas fa-robot"></i>
+                    <h2> Travel Budget Planning</h2>
+                </div>
+                <p>Let our AI help you plan your travel budget based on your destination and preferences.</p>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="ai-destination">Destination</label>
+                        <input type="text" id="ai-destination" placeholder="Where are you going?">
+                    </div>
+                    <div class="form-group">
+                        <label for="ai-travelers">Number of Travelers</label>
+                        <input type="number" id="ai-travelers" placeholder="How many people?" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="ai-duration">Trip Duration (days)</label>
+                        <input type="number" id="ai-duration" placeholder="How many days?" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="ai-budget-level">Budget Level</label>
+                        <select id="ai-budget-level">
+                            <option value="budget">Budget</option>
+                            <option value="mid-range" selected>Mid-range</option>
+                            <option value="luxury">Luxury</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button class="plan-btn" id="generate-plan">
+                        <i class="fas fa-magic"></i> Generate Plan
+                    </button>
+                </div>
+                
+                <div class="ai-response" id="ai-response" style="display: none;">
+                    <h3><i class="fas fa-lightbulb"></i> AI Suggestions</h3>
+                    <p id="ai-response-text"></p>
+                    <div class="ai-actions">
+                        <button class="plan-btn" id="add-ai-expenses">
+                            <i class="fas fa-plus"></i> Add Expenses
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Manual Planning Section -->
+            <section class="planner-section">
+                <div class="section-title">
+                    <i class="fas fa-edit"></i>
+                    <h2>Manual Expense Planning</h2>
+                </div>
+                <p>Enter your travel expenses manually to track your spending.</p>
+                
+                <form id="expense-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="expense-name">Expense Name</label>
+                            <input type="text" id="expense-name" placeholder="e.g. Hotel, Flight, etc." required>
+                        </div>
+                        <div class="form-group">
+                            <label for="expense-amount">Amount (₹)</label>
+                            <input type="number" id="expense-amount" placeholder="0.00" min="0" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="expense-date">Date</label>
+                            <input type="date" id="expense-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="expense-category">Category</label>
+                            <select id="expense-category" required>
+                                <option value="">Select category</option>
+                                <option value="accommodation">Accommodation</option>
+                                <option value="transportation">Transportation</option>
+                                <option value="food">Food & Dining</option>
+                                <option value="activities">Activities</option>
+                                <option value="shopping">Shopping</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="expense-notes">Notes</label>
+                        <textarea id="expense-notes" rows="3" placeholder="Any additional details..."></textarea>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="plan-btn">
+                            <i class="fas fa-plus"></i> Add Expense
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="manual-results">
+                    <div class="expenses-list">
+                        <h3><i class="fas fa-receipt"></i> Your Expenses</h3>
+                        <div id="expenses-container">
+                            <div class="no-expenses">
+                                <p>No expenses added yet. Start by adding your first expense!</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-card">
+                        <h3><i class="fas fa-chart-pie"></i> Trip Summary</h3>
+                        <div class="summary-item">
+                            <span class="summary-label">Accommodation:</span>
+                            <span class="summary-value" id="accommodation-total">₹0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Transportation:</span>
+                            <span class="summary-value" id="transportation-total">₹0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Food & Dining:</span>
+                            <span class="summary-value" id="food-total">₹0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Activities:</span>
+                            <span class="summary-value" id="activities-total">₹0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Shopping:</span>
+                            <span class="summary-value" id="shopping-total">₹0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Other:</span>
+                            <span class="summary-value" id="other-total">₹0</span>
+                        </div>
+                        <div class="summary-item total">
+                            <span class="summary-label">Total:</span>
+                            <span class="summary-value" id="grand-total">₹0</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile Menu Toggle
+            const hamburger = document.getElementById('hamburger');
+            const nav = document.getElementById('nav');
+            
+            hamburger.addEventListener('click', function() {
+                this.classList.toggle('open');
+                nav.classList.toggle('active');
+            });
+            
+            // Close mobile menu when clicking on a link
+            document.querySelectorAll('nav ul li a').forEach(link => {
+                link.addEventListener('click', () => {
+                    hamburger.classList.remove('open');
+                    nav.classList.remove('active');
+                });
+            });
+            
+            // Sticky Header
+            const header = document.getElementById('header');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+            
+            // AI Plan Generation
+            const generatePlanBtn = document.getElementById('generate-plan');
+            const aiResponse = document.getElementById('ai-response');
+            const aiResponseText = document.getElementById('ai-response-text');
+            const addAiExpensesBtn = document.getElementById('add-ai-expenses');
+            
+            let aiGeneratedExpenses = [];
+            
+            generatePlanBtn.addEventListener('click', function() {
+                const destination = document.getElementById('ai-destination').value;
+                const travelers = document.getElementById('ai-travelers').value;
+                const duration = document.getElementById('ai-duration').value;
+                const budgetLevel = document.getElementById('ai-budget-level').value;
+                
+                if (!destination || !travelers || !duration) {
+                    alert('Please fill in all fields to generate a plan.');
+                    return;
+                }
+                
+                // Show loading state
+                aiResponse.style.display = 'block';
+                aiResponse.classList.add('loading');
+                aiResponseText.textContent = '';
+                
+                // Simulate API call to OpenAI (in a real app, this would be an actual API call)
+                setTimeout(() => {
+                    // Remove loading state
+                    aiResponse.classList.remove('loading');
+                    
+                    // Generate sample response based on inputs
+                    const budgetLevels = {
+                        'budget': 'budget-friendly',
+                        'mid-range': 'comfortable mid-range',
+                        'luxury': 'luxury'
+                    };
+                    
+                    // Adjusted daily budgets in Indian Rupees
+                    const dailyBudgets = {
+                        'budget': 2000,    // ~$25
+                        'mid-range': 6000, // ~$75
+                        'luxury': 16000    // ~$200
+                    };
+                    
+                    const totalBudget = dailyBudgets[budgetLevel] * duration * travelers;
+                    
+                    // Generate sample expenses for the AI to suggest
+                    aiGeneratedExpenses = [
+                        {
+                            name: `${budgetLevels[budgetLevel]} Accommodation`,
+                            amount: (dailyBudgets[budgetLevel] * 0.4 * duration * travelers),
+                            category: 'accommodation',
+                            notes: `Estimated ${budgetLevel} accommodation for ${duration} days`
+                        },
+                        {
+                            name: 'Food & Dining',
+                            amount: (dailyBudgets[budgetLevel] * 0.3 * duration * travelers),
+                            category: 'food',
+                            notes: `Estimated food costs for ${duration} days`
+                        },
+                        {
+                            name: 'Transportation',
+                            amount: (dailyBudgets[budgetLevel] * 0.15 * duration * travelers),
+                            category: 'transportation',
+                            notes: 'Local transportation and transfers'
+                        },
+                        {
+                            name: 'Activities & Sightseeing',
+                            amount: (dailyBudgets[budgetLevel] * 0.1 * duration * travelers),
+                            category: 'activities',
+                            notes: 'Tours, entrance fees, and activities'
+                        },
+                        {
+                            name: 'Miscellaneous',
+                            amount: (dailyBudgets[budgetLevel] * 0.05 * duration * travelers),
+                            category: 'other',
+                            notes: 'Souvenirs, tips, and unexpected expenses'
+                        }
+                    ];
+                    
+                    const response = `
+                        <p>For your ${duration}-day trip to ${destination} with ${travelers} ${travelers == 1 ? 'person' : 'people'} on a ${budgetLevels[budgetLevel]} budget, here's a suggested breakdown:</p>
+                        
+                        <p><strong>Estimated Total Budget:</strong> ₹${totalBudget.toLocaleString()}</p>
+                        
+                        <p><strong>Daily Breakdown (per person):</strong></p>
+                        <ul>
+                            <li>Accommodation: ₹${(dailyBudgets[budgetLevel] * 0.4).toFixed(2)}</li>
+                            <li>Food: ₹${(dailyBudgets[budgetLevel] * 0.3).toFixed(2)}</li>
+                            <li>Transportation: ₹${(dailyBudgets[budgetLevel] * 0.15).toFixed(2)}</li>
+                            <li>Activities: ₹${(dailyBudgets[budgetLevel] * 0.1).toFixed(2)}</li>
+                            <li>Miscellaneous: ₹${(dailyBudgets[budgetLevel] * 0.05).toFixed(2)}</li>
+                        </ul>
+                        
+                        <p><strong>Tips:</strong></p>
+                        <ul>
+                            <li>Book accommodations in advance for better rates</li>
+                            <li>Try local eateries for authentic and affordable meals</li>
+                            <li>Consider public transportation to save on costs</li>
+                            ${budgetLevel === 'luxury' ? '<li>Look for package deals that include activities and meals</li>' : ''}
+                        </ul>
+                    `;
+                    
+                    aiResponseText.innerHTML = response;
+                    
+                    // Scroll to the response
+                    aiResponse.scrollIntoView({ behavior: 'smooth' });
+                }, 2000);
+            });
+            
+            // Add AI generated expenses to manual list
+            addAiExpensesBtn.addEventListener('click', function() {
+                if (aiGeneratedExpenses.length === 0) {
+                    alert('No expenses to add. Please generate a plan first.');
+                    return;
+                }
+                
+                // Get current expenses from localStorage
+                let expenses = JSON.parse(localStorage.getItem('travelExpenses')) || [];
+                
+                // Add AI generated expenses with current date
+                const today = new Date().toISOString().split('T')[0];
+                aiGeneratedExpenses.forEach(expense => {
+                    expenses.push({
+                        id: Date.now() + Math.floor(Math.random() * 1000), // unique ID
+                        name: expense.name,
+                        amount: expense.amount,
+                        date: today,
+                        category: expense.category,
+                        notes: expense.notes
+                    });
+                });
+                
+                // Save back to localStorage
+                localStorage.setItem('travelExpenses', JSON.stringify(expenses));
+                
+                // Update the display
+                updateExpensesDisplay();
+                
+                // Scroll to the manual planning section
+                document.querySelector('.manual-results').scrollIntoView({ behavior: 'smooth' });
+                
+                // Show success message
+                alert('AI-generated expenses have been added to your trip!');
+            });
+            
+            // Manual Expense Tracking
+            const expenseForm = document.getElementById('expense-form');
+            const expensesContainer = document.getElementById('expenses-container');
+            let expenses = JSON.parse(localStorage.getItem('travelExpenses')) || [];
+            
+            // Initialize the expenses display
+            updateExpensesDisplay();
+            
+            expenseForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const expense = {
+                    id: Date.now(),
+                    name: document.getElementById('expense-name').value,
+                    amount: parseFloat(document.getElementById('expense-amount').value),
+                    date: document.getElementById('expense-date').value,
+                    category: document.getElementById('expense-category').value,
+                    notes: document.getElementById('expense-notes').value
+                };
+                
+                expenses.push(expense);
+                localStorage.setItem('travelExpenses', JSON.stringify(expenses));
+                
+                updateExpensesDisplay();
+                expenseForm.reset();
+                
+                // Scroll to the new expense
+                const newExpenseElement = document.getElementById(`expense-${expense.id}`);
+                if (newExpenseElement) {
+                    newExpenseElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    
+                    // Add highlight animation
+                    newExpenseElement.classList.add('highlight');
+                    setTimeout(() => {
+                        newExpenseElement.classList.remove('highlight');
+                    }, 2000);
+                }
+            });
+            
+            function updateExpensesDisplay() {
+                if (expenses.length === 0) {
+                    expensesContainer.innerHTML = `
+                        <div class="no-expenses">
+                            <p>No expenses added yet. Start by adding your first expense!</p>
+                        </div>
+                    `;
+                } else {
+                    // Sort expenses by date (newest first)
+                    expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    
+                    expensesContainer.innerHTML = '';
+                    
+                    expenses.forEach(expense => {
+                        const expenseElement = document.createElement('div');
+                        expenseElement.className = 'expense-item';
+                        expenseElement.id = `expense-${expense.id}`;
+                        
+                        const categoryClass = `category-${expense.category}`;
+                        
+                        expenseElement.innerHTML = `
+                            <div class="expense-header">
+                                <span class="expense-title">${expense.name}</span>
+                                <span class="expense-amount">₹${expense.amount.toFixed(2)}</span>
+                            </div>
+                            <div class="expense-details">
+                                <span class="expense-date">
+                                    <i class="far fa-calendar-alt"></i> ${formatDate(expense.date)}
+                                </span>
+                                <span class="expense-category ${categoryClass}">
+                                    <i class="${getCategoryIcon(expense.category)}"></i> ${formatCategory(expense.category)}
+                                </span>
+                            </div>
+                            ${expense.notes ? `<p class="expense-notes">${expense.notes}</p>` : ''}
+                            <button class="delete-expense" data-id="${expense.id}">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        `;
+                        
+                        expensesContainer.appendChild(expenseElement);
+                    });
+                    
+                    // Add event listeners to delete buttons
+                    document.querySelectorAll('.delete-expense').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const expenseId = parseInt(this.getAttribute('data-id'));
+                            expenses = expenses.filter(exp => exp.id !== expenseId);
+                            localStorage.setItem('travelExpenses', JSON.stringify(expenses));
+                            updateExpensesDisplay();
+                        });
+                    });
+                }
+                
+                updateSummary();
+            }
+            
+            function updateSummary() {
+                const categories = {
+                    'accommodation': 0,
+                    'transportation': 0,
+                    'food': 0,
+                    'activities': 0,
+                    'shopping': 0,
+                    'other': 0
+                };
+                
+                let grandTotal = 0;
+                
+                expenses.forEach(expense => {
+                    categories[expense.category] += expense.amount;
+                    grandTotal += expense.amount;
+                });
+                
+                // Update the summary card
+                document.getElementById('accommodation-total').textContent = `₹${categories.accommodation.toFixed(2)}`;
+                document.getElementById('transportation-total').textContent = `₹${categories.transportation.toFixed(2)}`;
+                document.getElementById('food-total').textContent = `₹${categories.food.toFixed(2)}`;
+                document.getElementById('activities-total').textContent = `₹${categories.activities.toFixed(2)}`;
+                document.getElementById('shopping-total').textContent = `₹${categories.shopping.toFixed(2)}`;
+                document.getElementById('other-total').textContent = `₹${categories.other.toFixed(2)}`;
+                document.getElementById('grand-total').textContent = `₹${grandTotal.toFixed(2)}`;
+            }
+            
+            function formatDate(dateString) {
+                const options = { year: 'numeric', month: 'short', day: 'numeric' };
+                return new Date(dateString).toLocaleDateString(undefined, options);
+            }
+            
+            function formatCategory(category) {
+                return category.charAt(0).toUpperCase() + category.slice(1).replace('-', ' ');
+            }
+            
+            function getCategoryIcon(category) {
+                const icons = {
+                    'accommodation': 'fas fa-hotel',
+                    'transportation': 'fas fa-bus',
+                    'food': 'fas fa-utensils',
+                    'activities': 'fas fa-ticket-alt',
+                    'shopping': 'fas fa-shopping-bag',
+                    'other': 'fas fa-wallet'
+                };
+                return icons[category] || 'fas fa-wallet';
+            }
+            
+            // Animate elements when they come into view
+            const animateOnScroll = function() {
+                const elements = document.querySelectorAll('.planner-section');
+                
+                elements.forEach(element => {
+                    const elementPosition = element.getBoundingClientRect().top;
+                    const windowHeight = window.innerHeight;
+                    
+                    if (elementPosition < windowHeight - 100) {
+                        element.style.opacity = '1';
+                        element.style.transform = 'translateY(0)';
+                    }
+                });
+            };
+            
+            // Run once on load
+            animateOnScroll();
+            
+            // Run on scroll
+            window.addEventListener('scroll', animateOnScroll);
+            
+            // Set today's date as default for the date picker
+            document.getElementById('expense-date').valueAsDate = new Date();
+        });
+    </script>
+</body>
+</html>
