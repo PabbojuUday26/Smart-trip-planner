@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Smart Trip | Your Ultimate Travel Companion</title>
+    <title> Smart Trip </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -214,7 +214,7 @@
             left: 50%;
         }
 
-        /* Hero Section with Parallax Effect */
+        /* Hero Section with Background Image and Gradient Overlay */
         .hero {
             background: url('https://images.unsplash.com/photo-1506929562872-bb421503ef21?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') no-repeat center center/cover;
             height: 100vh;
@@ -301,59 +301,6 @@
 
         .search-bar button:hover {
             background: var(--gradient-hover);
-        }
-
-        /* AI Response Container */
-        .ai-response-container {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: var(--border-radius);
-            padding: 1.5rem;
-            margin-top: 2rem;
-            max-width: 700px;
-            box-shadow: var(--shadow-sm);
-            display: none;
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        .ai-response {
-            color: var(--dark);
-        }
-
-        .ai-response h3 {
-            margin-bottom: 0.5rem;
-            color: var(--primary);
-        }
-
-        .ai-response ul {
-            margin-top: 0.5rem;
-            padding-left: 1.5rem;
-        }
-
-        .ai-response a {
-            color: var(--primary);
-            font-weight: 500;
-            text-decoration: none;
-        }
-
-        .ai-response a:hover {
-            text-decoration: underline;
-        }
-
-        .ai-loading {
-            display: none;
-            text-align: center;
-            padding: 1rem;
-        }
-
-        .ai-loading i {
-            font-size: 1.5rem;
-            color: var(--primary);
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
         }
 
         /* Floating Particles Animation */
@@ -1202,11 +1149,6 @@
                 justify-content: center;
             }
             
-            .ai-response-container {
-                margin-top: 1rem;
-                padding: 1rem;
-            }
-            
             .features-grid {
                 grid-template-columns: 1fr;
             }
@@ -1283,7 +1225,8 @@
                 </ul>
             </nav>
             <div class="auth-buttons">
-                <button class="btn btn-solid"><a href="index.html" style="text-decoration: none;">Sign Out </a></button>
+                <button class="btn btn-outline"><a href="login.html" style="text-decoration: none;">Login</a></button>
+                <button class="btn btn-solid"><a href="login.html" style="text-decoration: none;">Sign up</a></button>
             </div>
             <div class="hamburger" id="hamburger">
                 <span></span>
@@ -1301,16 +1244,8 @@
             <h1>Discover Your Next Adventure</h1>
             <p>Explore the world with our comprehensive travel tools and services. Find the best deals, plan your itinerary, and make unforgettable memories.</p>
             <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="Ask me anything about travel...">
-                <button id="searchButton"><i class="fas fa-search"></i> Search</button>
-            </div>
-            <!-- AI Response Container -->
-            <div class="ai-response-container" id="aiResponseContainer">
-                <div class="ai-response" id="aiResponse"></div>
-                <div class="ai-loading" id="aiLoading">
-                    <i class="fas fa-spinner"></i>
-                    <p>Thinking...</p>
-                </div>
+                <input type="text" placeholder="Search destinations, hotels, activities...">
+                <button><i class="fas fa-search"></i> Search</button>
             </div>
         </div>
     </section>
@@ -1364,7 +1299,7 @@
                     </div>
                     <div class="component-body">
                         <p>Plan your travel budget with our interactive expense tracker. Set daily limits, categorize expenses, and get real-time spending alerts to stay on budget throughout your journey.</p>
-                       <a href="expenseplan.html" ><button class="component-btn">Start Planning <i class="fas fa-arrow-right"></i></button> </a>
+                        <button class="component-btn">Start Planning <i class="fas fa-arrow-right"></i></button>
                     </div>
                 </div>
                 <div class="component-card">
@@ -1373,7 +1308,7 @@
                     </div>
                     <div class="component-body">
                         <p>Get turn-by-turn directions with our real-time navigation system that works offline. Discover local attractions, restaurants, and hidden gems along your route.</p>
-                        <a href="realtimedir.html"><button class="component-btn">Explore Now <i class="fas fa-arrow-right"></i></button> </a>
+                        <a href="food.html"><button class="component-btn">Explore Now <i class="fas fa-arrow-right"></i></button> </a>
                     </div>
                 </div>
                 <div class="component-card">
@@ -1382,7 +1317,7 @@
                     </div>
                     <div class="component-body">
                         <p>Compare prices from hundreds of booking sites to find your perfect stay. Filter by amenities, location, and reviews to book with confidence.</p>
-                      <a href="hotels.html"><button class="component-btn">Find Hotels <i class="fas fa-arrow-right"></i></button></a>
+                        <button class="component-btn">Find Hotels <i class="fas fa-arrow-right"></i></button>
                     </div>
                 </div>
                 <div class="component-card">
@@ -1391,7 +1326,7 @@
                     </div>
                     <div class="component-body">
                         <p>One-stop shop for all your travel tickets. Book flights, trains, buses, and event tickets across all major platforms with our price comparison tool.</p>
-                        <a href="ticketbooking.html"> <button class="component-btn">Book Tickets <i class="fas fa-arrow-right"></i></button></a>
+                        <button class="component-btn">Book Tickets <i class="fas fa-arrow-right"></i></button>
                     </div>
                 </div>
             </div>
@@ -1707,140 +1642,6 @@
                 }
             }
             
-            // AI Search Functionality
-            const searchInput = document.getElementById('searchInput');
-            const searchButton = document.getElementById('searchButton');
-            const aiResponseContainer = document.getElementById('aiResponseContainer');
-            const aiResponse = document.getElementById('aiResponse');
-            const aiLoading = document.getElementById('aiLoading');
-            
-            // Function to handle AI responses
-            function getAIResponse(query) {
-                // Show loading state
-                aiResponseContainer.style.display = 'block';
-                aiResponse.style.display = 'none';
-                aiLoading.style.display = 'block';
-                
-                // Simulate API call with timeout
-                setTimeout(() => {
-                    // Hide loading
-                    aiLoading.style.display = 'none';
-                    aiResponse.style.display = 'block';
-                    
-                    // Process the query and generate response
-                    const response = generateTravelResponse(query);
-                    aiResponse.innerHTML = response;
-                    
-                    // Scroll to response
-                    aiResponseContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }, 1500);
-            }
-            
-            // Generate appropriate responses based on query
-            function generateTravelResponse(query) {
-                const lowerQuery = query.toLowerCase();
-                
-                // Destination recommendations
-                if (lowerQuery.includes('best place') || lowerQuery.includes('where should i go') || lowerQuery.includes('top destination')) {
-                    return `
-                        <h3>Travel Recommendations</h3>
-                        <p>Based on your interest in finding great places to visit, here are some top destinations:</p>
-                        <ul>
-                            <li><strong>Bali, Indonesia</strong> - Perfect for beaches and culture</li>
-                            <li><strong>Kyoto, Japan</strong> - Beautiful temples and cherry blossoms</li>
-                            <li><strong>Paris, France</strong> - Romantic city with amazing architecture</li>
-                            <li><strong>Cape Town, South Africa</strong> - Stunning landscapes and wildlife</li>
-                        </ul>
-                        <p>Would you like more specific recommendations based on your budget or travel dates?</p>
-                    `;
-                }
-                
-                // Budget travel
-                if (lowerQuery.includes('cheap') || lowerQuery.includes('budget') || lowerQuery.includes('affordable')) {
-                    return `
-                        <h3>Budget Travel Tips</h3>
-                        <p>Here are some great budget-friendly travel options:</p>
-                        <ul>
-                            <li>Consider <strong>Vietnam</strong> or <strong>Thailand</strong> for affordable destinations with amazing food and culture</li>
-                            <li>Travel during shoulder seasons (just before/after peak season) for better deals</li>
-                            <li>Use our <a href="#features" style="color: var(--primary); font-weight: 500;">expense planner</a> to track your travel budget</li>
-                            <li>Book flights on Tuesday/Wednesday for best prices</li>
-                        </ul>
-                    `;
-                }
-                
-                // Hotel queries
-                if (lowerQuery.includes('hotel') || lowerQuery.includes('stay') || lowerQuery.includes('accommodation')) {
-                    return `
-                        <h3>Accommodation Help</h3>
-                        <p>For hotel bookings, I recommend:</p>
-                        <ul>
-                            <li>Checking our <a href="hotels.html" style="color: var(--primary); font-weight: 500;">hotel booking tool</a> for the best prices</li>
-                            <li>Looking at guest reviews and ratings carefully</li>
-                            <li>Considering location - being central often saves transportation costs</li>
-                            <li>Checking cancellation policies before booking</li>
-                        </ul>
-                        <p>Would you like me to search for hotels in a specific location?</p>
-                    `;
-                }
-                
-                // Flight queries
-                if (lowerQuery.includes('flight') || lowerQuery.includes('airline') || lowerQuery.includes('air ticket')) {
-                    return `
-                        <h3>Flight Information</h3>
-                        <p>For flight bookings, I suggest:</p>
-                        <ul>
-                            <li>Using our <a href="ticketbooking.html" style="color: var(--primary); font-weight: 500;">ticket booking tool</a> to compare prices across airlines</li>
-                            <li>Booking 6-8 weeks in advance for domestic, 3-5 months for international</li>
-                            <li>Being flexible with dates can save you up to 30%</li>
-                            <li>Considering nearby airports for better deals</li>
-                        </ul>
-                    `;
-                }
-                
-                // General travel advice
-                if (lowerQuery.includes('advice') || lowerQuery.includes('tip') || lowerQuery.includes('suggestion')) {
-                    return `
-                        <h3>Travel Tips</h3>
-                        <p>Here are some general travel recommendations:</p>
-                        <ul>
-                            <li>Always have digital and physical copies of important documents</li>
-                            <li>Learn a few basic phrases in the local language</li>
-                            <li>Pack light - you'll need less than you think</li>
-                            <li>Get travel insurance for international trips</li>
-                            <li>Inform your bank about travel plans to avoid card issues</li>
-                        </ul>
-                    `;
-                }
-                
-                // Default response for unrecognized queries
-                return `
-                    <h3>Travel Assistant</h3>
-                    <p>I can help you with:</p>
-                    <ul>
-                        <li>Destination recommendations</li>
-                        <li>Budget travel tips</li>
-                        <li>Hotel and flight bookings</li>
-                        <li>Travel planning advice</li>
-                        <li>Itinerary suggestions</li>
-                    </ul>
-                    <p>Try asking something like: "What are the best places to visit in Europe?" or "How can I travel on a budget?"</p>
-                `;
-            }
-            
-            // Event listeners for search
-            searchButton.addEventListener('click', function() {
-                if (searchInput.value.trim() !== '') {
-                    getAIResponse(searchInput.value);
-                }
-            });
-            
-            searchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter' && searchInput.value.trim() !== '') {
-                    getAIResponse(searchInput.value);
-                }
-            });
-            
             // Animate elements when they come into view
             const animateOnScroll = function() {
                 const elements = document.querySelectorAll('.feature-card, .component-card, .destination-card, .testimonial-card');
@@ -1861,6 +1662,15 @@
             
             // Run on scroll
             window.addEventListener('scroll', animateOnScroll);
+            
+            // Component card buttons - simulate functionality
+            document.querySelectorAll('.component-btn').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const cardTitle = this.closest('.component-card').querySelector('h3').textContent;
+                    alert(`You clicked on "${cardTitle}". Login to open`);
+                });
+            });
             
             // Destination card hover effect enhancement
             document.querySelectorAll('.destination-card').forEach(card => {
